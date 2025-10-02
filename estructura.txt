@@ -1,0 +1,18 @@
+fastpos-electron/
+├── public/
+│   └── index.html
+├── src/
+│   ├── main/
+│   │   └── main.js
+│   ├── renderer/
+│   │   ├── components/
+│   │   │   ├── Login.js
+│   │   │   ├── Dashboard.js
+│   │   │   └── Register.js
+│   │   ├── firebase.js
+│   │   ├── App.js
+│   │   ├── App.css
+│   │   └── index.js
+│   └── preload.js
+├── package.json
+└── README.md

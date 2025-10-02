@@ -1,0 +1,51 @@
+{
+  "name": "fastpos-electron",
+  "version": "1.0.0",
+  "description": "Sistema de punto de venta con Electron y Firebase",
+  "main": "src/main/main.js",
+  "homepage": "./",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "dev": "concurrently \"npm start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron": "electron .",
+    "package": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "chart.js": "^4.5.0",
+    "firebase": "^10.14.1",
+    "firebase-admin": "^13.5.0",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0",
+    "react-scripts": "^5.0.0"
+  },
+  "build": {
+    "appId": "com.fastpos.app",
+    "productName": "FastPOS",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
