@@ -10,20 +10,36 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
 import { Bar, Line } from 'react-chartjs-2';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
-
 const Dashboard = ({ user, onLogout, onSectionChange }) => {
+  // Estado inicial con valores por defecto visibles
   const [metrics, setMetrics] = useState({
     ventasHoy: 0,
     pedidosHoy: 0,
     ticketPromedio: 0,
+    pedidosPendientes: 0,
     topProductos: [],
-    ventas7Dias: { labels: [], data: [] }
+    ventas7Dias: {
+      labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+      data: [0, 0, 0, 0, 0, 0, 0]
+    }
   });
   const [loading, setLoading] = useState(true);
 
@@ -39,83 +55,69 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        // === 1. Ventas de hoy ===
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        const manana = new Date(hoy);
-        manana.setDate(manana.getDate() + 1);
-
-        const ventasHoySnap = await getDocs(
-          query(collection(db, 'ventas'), where('fecha', '>=', hoy), where('fecha', '<', manana))
-        );
-        const ventasHoy = ventasHoySnap.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
-        const pedidosHoy = ventasHoySnap.size;
-        const ticketPromedio = pedidosHoy > 0 ? Math.round(ventasHoy / pedidosHoy) : 0;
-
-        // === 2. Ventas últimos 7 días ===
-        const labels = [];
-        const data = [];
-        for (let i = 6; i >= 0; i--) {
-          const date = new Date();
-          date.setDate(date.getDate() - i);
-          date.setHours(0, 0, 0, 0);
-          const nextDay = new Date(date);
-          nextDay.setDate(nextDay.getDate() + 1);
-
-          const snap = await getDocs(
-            query(collection(db, 'ventas'), where('fecha', '>=', date), where('fecha', '<', nextDay))
-          );
-          const total = snap.docs.reduce((sum, doc) => sum + (doc.data().total || 0), 0);
-          const day = date.toLocaleDateString('es-ES', { weekday: 'short' });
-          labels.push(day);
-          data.push(total);
-        }
-
-        // === 3. Top productos del mes ===
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const ventasMesSnap = await getDocs(
-          query(collection(db, 'ventas'), where('fecha', '>=', startOfMonth))
-        );
-
-        const productoMap = {};
-        ventasMesSnap.docs.forEach(doc => {
-          const productos = doc.data().productos || [];
-          productos.forEach(p => {
-            if (!productoMap[p.nombre]) {
-              productoMap[p.nombre] = 0;
+        const metricsDoc = await getDoc(doc(db, 'metrics', 'resumen'));
+        if (metricsDoc.exists()) {
+          const data = metricsDoc.data();
+          setMetrics({
+            ventasHoy: typeof data.ventasHoy === 'number' ? data.ventasHoy : 0,
+            pedidosHoy: typeof data.pedidosHoy === 'number' ? data.pedidosHoy : 0,
+            ticketPromedio: typeof data.ticketPromedio === 'number' ? data.ticketPromedio : 0,
+            pedidosPendientes: typeof data.pedidosPendientes === 'number' ? data.pedidosPendientes : 0,
+            topProductos: Array.isArray(data.topProductos) ? data.topProductos : [],
+            ventas7Dias: {
+              labels: Array.isArray(data.ventas7Dias?.labels) && data.ventas7Dias.labels.length === 7
+                ? data.ventas7Dias.labels
+                : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+              data: Array.isArray(data.ventas7Dias?.data) && data.ventas7Dias.data.length === 7
+                ? data.ventas7Dias.data.map(v => (typeof v === 'number' ? v : 0))
+                : [0, 0, 0, 0, 0, 0, 0]
             }
-            productoMap[p.nombre] += p.cantidad || 1;
           });
-        });
-
-        const topProductos = Object.entries(productoMap)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([nombre, vendidos]) => ({ nombre, vendidos }));
-
-        setMetrics({
-          ventasHoy,
-          pedidosHoy,
-          ticketPromedio,
-          topProductos,
-          ventas7Dias: { labels, data }
-        });
+        } else {
+          // Documento no existe → usar valores por defecto
+          setMetrics({
+            ventasHoy: 0,
+            pedidosHoy: 0,
+            ticketPromedio: 0,
+            pedidosPendientes: 0,
+            topProductos: [],
+            ventas7Dias: {
+              labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+               data: [0, 0, 0, 0, 0, 0, 0]
+            }
+          });
+        }
       } catch (error) {
         console.error('Error al cargar métricas:', error);
+        // En caso de error (ej. permisos), mostrar valores por defecto
+        setMetrics({
+          ventasHoy: 0,
+          pedidosHoy: 0,
+          ticketPromedio: 0,
+          pedidosPendientes: 0,
+          topProductos: [],
+          ventas7Dias: {
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            data: [0, 0, 0, 0, 0, 0, 0]
+          }
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000);
+    return () => clearInterval(interval);
   }, []);
 
+  const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
+
   const barData = {
-    labels: metrics.topProductos.map(p => p.nombre),
+    labels: metrics.topProductos.map(p => p.nombre || 'Producto'),
     datasets: [{
       label: 'Unidades vendidas',
-      data: metrics.topProductos.map(p => p.vendidos),
+      data: metrics.topProductos.map(p => (typeof p.vendidos === 'number' ? p.vendidos : 0)),
       backgroundColor: '#D96704',
       borderColor: '#400101',
       borderWidth: 1,
@@ -161,39 +163,54 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
           ))}
         </nav>
         <div className="navbar-user">
-          <span>Bienvenido, <strong>{user?.name || 'Usuario'}</strong></span>
+          <span>Bienvenido, <strong>{displayName}</strong></span>
           <button className="btn-logout" onClick={onLogout}>Cerrar Sesión</button>
         </div>
       </header>
 
       <main className="dashboard-main">
+        {/* Siempre mostrar las métricas, incluso durante la carga */}
         <div className="metrics-grid">
           <div className="metric-card">
             <div className="metric-label">Ventas Hoy</div>
-            <div className="metric-value">${metrics.ventasHoy.toLocaleString()}</div>
+            <div className="metric-value">${(metrics.ventasHoy || 0).toLocaleString()}</div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card1">
             <div className="metric-label">Pedidos Hoy</div>
-            <div className="metric-value">{metrics.pedidosHoy}</div>
+            <div className="metric-value">{metrics.pedidosHoy || 0}</div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card2">
             <div className="metric-label">Ticket Promedio</div>
-            <div className="metric-value">${metrics.ticketPromedio.toLocaleString()}</div>
+            <div className="metric-value">${(metrics.ticketPromedio || 0).toLocaleString()}</div>
+          </div>
+          <div className="metric-card3">
+            <div className="metric-label">Pedidos Pendientes</div>
+            <div className="metric-value">{metrics.pedidosPendientes || 0}</div>
           </div>
         </div>
 
         <div className="charts-row">
           <div className="chart-card">
             <h3>Tendencia de Ventas (Últimos 7 días)</h3>
-            <Line data={lineData} options={options} />
+            {loading ? (
+              <p>Cargando datos...</p>
+            ) : metrics.ventas7Dias.data.some(v => v > 0) ? (
+              <Line data={lineData} options={options} />
+            ) : (
+              <p>Sin ventas registradas en los últimos 7 días.</p>
+            )}
           </div>
           <div className="chart-card">
             <h3>Productos Más Vendidos (Mes)</h3>
-            <Bar data={barData} options={options} />
+            {loading ? (
+              <p>Cargando datos...</p>
+            ) : metrics.topProductos.length > 0 ? (
+              <Bar data={barData} options={options} />
+            ) : (
+              <p>No hay productos con ventas aún.</p>
+            )}
           </div>
         </div>
-
-        {loading && <p className="cargando">Cargando métricas...</p>}
       </main>
     </div>
   );

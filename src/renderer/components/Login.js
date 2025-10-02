@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 
-const Login = ({ onLogin, onShowRegister }) => {
+const Login = ({ onLogin, onShowRegister, onShowForgotPassword }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -83,15 +83,16 @@ const Login = ({ onLogin, onShowRegister }) => {
           {loading ? 'Iniciando...' : 'Iniciar Sesión'}
         </button>
       </form>
-
-      <button
-        className="btn-volver"
-        onClick={onShowRegister}
-        disabled={loading}
-        style={{ width: '100%' }}
-      >
-        ¿No tienes cuenta? Regístrate
-      </button>
+      <div className="forgot-password" style={{ marginBottom: '12px' }}>
+  ¿Olvidaste tu contraseña?{' '}
+  <span 
+    className="forgot-link" 
+    onClick={onShowForgotPassword}
+    style={{ fontWeight: 'bold', color: '#e0a800', cursor: 'pointer' }}
+  >
+    Recuperar
+  </span>
+</div>
     </div>
   );
 };

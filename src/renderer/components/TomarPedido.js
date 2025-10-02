@@ -1,14 +1,37 @@
 // src/renderer/components/TomarPedido.js
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack }) => {
   const [productos, setProductos] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState('pizzas');
   const [loading, setLoading] = useState(true);
+  const [ivaPorcentaje, setIvaPorcentaje] = useState(19);
+  const [carritoLocal, setCarritoLocal] = useState([]);
 
-  // Cargar productos desde Firestore
+  // Sincronizar carrito local con el carrito de App.js
+  useEffect(() => {
+    setCarritoLocal(carritoActual);
+  }, [carritoActual]);
+
+  // Cargar configuración (IVA)
+  useEffect(() => {
+    const cargarConfiguracion = async () => {
+      try {
+        const configDoc = await getDoc(doc(db, 'config', 'app'));
+        if (configDoc.exists()) {
+          const config = configDoc.data();
+          setIvaPorcentaje(config.impuesto || 19);
+        }
+      } catch (error) {
+        console.warn('No se pudo cargar la configuración. Usando IVA por defecto (19%).');
+      }
+    };
+    cargarConfiguracion();
+  }, []);
+
+  // Cargar productos
   useEffect(() => {
     const fetchProductos = async () => {
       try {
@@ -28,26 +51,38 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
         setLoading(false);
       }
     };
-
     fetchProductos();
   }, []);
 
-  // Agregar producto al carrito (notificar a App.js)
   const agregarProducto = (producto) => {
-    onAgregarAlCarrito([{ ...producto, cantidad: 1 }]);
+    const nuevoItem = { ...producto, cantidad: 1 };
+    const nuevoCarrito = [...carritoLocal, nuevoItem];
+    setCarritoLocal(nuevoCarrito);
+    onAgregarAlCarrito([nuevoItem]);
   };
 
-  // Calcular totales usando el carrito recibido
-  const total = carritoActual.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0);
-  const iva = Math.round(total * 0.19);
-  const totalConIva = total + iva;
+  const eliminarProducto = (id) => {
+    const nuevoCarrito = carritoLocal.filter(item => item.id !== id);
+    setCarritoLocal(nuevoCarrito);
+    // Opcional: notificar a App.js si es necesario
+    // Pero al menos el estado local se actualiza
+  };
+
+  // Calcular totales con IVA dinámico
+  const subtotal = useMemo(() =>
+    carritoLocal.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0),
+    [carritoLocal]
+  );
+  const iva = useMemo(() => Math.round(subtotal * (ivaPorcentaje / 100)), [subtotal, ivaPorcentaje]);
+  const total = subtotal + iva;
 
   const handleIrACaja = () => {
-    if (carritoActual.length === 0) {
+    if (carritoLocal.length === 0) {
       alert('Agrega al menos un producto al pedido.');
       return;
     }
-    onIrACaja(); // Solo navega, el carrito ya está en App.js
+    // Asegúrate de que App.js tenga el carrito actualizado
+    onIrACaja();
   };
 
   const productosFiltrados = productos.filter(p => p.categoria === categoriaActiva);
@@ -55,7 +90,6 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
 
   return (
     <div className="tomar-pedido-container">
-      {/* Encabezado con botón de volver */}
       <div className="pedido-header">
         <button className="btn-volver" onClick={onBack}>
           ← Volver
@@ -63,9 +97,7 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
         <h2>Tomar Pedido</h2>
       </div>
 
-      {/* Contenido principal: 2 columnas */}
       <div className="pedido-content">
-        {/* Columna izquierda: Productos */}
         <div className="productos-columna">
           {loading ? (
             <p className="cargando">Cargando menú...</p>
@@ -88,38 +120,48 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
           )}
         </div>
 
-        {/* Columna derecha: Resumen de orden */}
         <div className="orden-columna">
           <div className="orden-panel">
             <h3>Orden</h3>
-            {carritoActual.length === 0 ? (
+            {carritoLocal.length === 0 ? (
               <p>No hay productos en la orden.</p>
             ) : (
               <>
                 <div className="orden-lista">
                   <div className="orden-header">
                     <strong>ARTÍCULO</strong>
-                    <strong>PRECIO</strong>
+                    <strong>ACCIONES</strong>
                   </div>
-                  {carritoActual.map(item => (
+                  {carritoLocal.map(item => (
                     <div key={item.id} className="orden-item">
                       <span>{item.nombre} x{item.cantidad || 1}</span>
-                      <span>${(item.precio * (item.cantidad || 1)).toLocaleString()}</span>
+                      <div className="acciones-item">
+                        <span className="precio-item">
+                          ${(item.precio * (item.cantidad || 1)).toLocaleString()}
+                        </span>
+                        <button
+                          className="btn-eliminar-item"
+                          onClick={() => eliminarProducto(item.id)}
+                          aria-label="Eliminar producto"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
                 <div className="orden-totales">
                   <div className="total-row">
-                    <span>Precio total $:</span>
-                    <span>${total.toLocaleString()}</span>
+                    <span>Subtotal:</span>
+                    <span>${subtotal.toLocaleString()}</span>
                   </div>
                   <div className="total-row">
-                    <span>IVA $:</span>
+                    <span>IVA ({ivaPorcentaje}%)</span>
                     <span>${iva.toLocaleString()}</span>
                   </div>
-                  <div className="total-row">
-                    <span>Total con IVA:</span>
-                    <span>${totalConIva.toLocaleString()}</span>
+                  <div className="total-row total-final">
+                    <span>Total:</span>
+                    <span>${total.toLocaleString()}</span>
                   </div>
                 </div>
                 <button className="btn-ingresar" onClick={handleIrACaja}>
@@ -131,7 +173,6 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
         </div>
       </div>
 
-      {/* Barra de categorías en la parte inferior */}
       <div className="categorias-barra">
         {categoriasUnicas.map(categoria => (
           <button

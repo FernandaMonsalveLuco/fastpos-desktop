@@ -1,50 +1,137 @@
 // src/App.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import Login from './renderer/components/Login';
 import Dashboard from './renderer/components/Dashboard';
-import Register from './renderer/components/Register';
 import Caja from './renderer/components/Caja';
 import TomarPedido from './renderer/components/TomarPedido';
+import UsuariosModule from './renderer/components/usuarios/UsuariosModule';
+import ProductosModule from './renderer/components/ProductosModule';
+import Pedidos from './renderer/components/Pedidos';
+import Configuracion from './renderer/components/Configuracion';
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Incluirá: uid, email, rol, etc.
+  const [loading, setLoading] = useState(true); // Para evitar parpadeo
   const [activeSection, setActiveSection] = useState('home');
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  const [carrito, setCarrito] = useState([]); // Carrito compartido
+  const [carrito, setCarrito] = useState([]);
 
-  const handleLogin = (userData) => {
-    setUser(userData);
-    setShowRegister(false);
-    setActiveSection('home');
+  const auth = getAuth();
+  const db = getFirestore();
+
+  // 🔄 Escuchar estado de autenticación al cargar la app
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // ✅ Cargar datos adicionales desde Firestore
+        try {
+          const userDoc = await getDoc(doc(db, 'Usuarios', firebaseUser.uid));
+          if (userDoc.exists()) {
+            const userData = { 
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              ...userDoc.data()
+            };
+            setUser(userData);
+          } else {
+            console.warn('Documento de usuario no encontrado en Firestore');
+            // Opcional: redirigir a perfil para completar registro
+            setUser({ uid: firebaseUser.uid, email: firebaseUser.email, rol: 'invitado' });
+          }
+        } catch (error) {
+          console.error('Error al cargar datos del usuario:', error);
+          setUser({ uid: firebaseUser.uid, email: firebaseUser.email });
+        }
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogin = async (firebaseUser) => {
+    // Este flujo ya debería haber cargado el user vía onAuthStateChanged
+    // Pero si usas login manual, repite la lógica:
+    try {
+      const userDoc = await getDoc(doc(db, 'Usuarios', firebaseUser.uid));
+      const userData = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        ...(userDoc.exists() ? userDoc.data() : { rol: 'invitado' })
+      };
+      setUser(userData);
+      setShowRegister(false);
+      setShowForgotPassword(false);
+      setActiveSection('home');
+    } catch (error) {
+      console.error('Error post-login:', error);
+      setUser({ uid: firebaseUser.uid, email: firebaseUser.email });
+    }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setActiveSection('home');
-    setCarrito([]); // Limpiar carrito al salir
+  const handleLogout = async () => {
+    await auth.signOut();
+    // onAuthStateChanged se encargará de limpiar el estado
   };
 
-  // Función para agregar productos al carrito (desde TomarPedido)
   const agregarAlCarrito = (productos) => {
-    // Asumimos que `productos` es un array (puede ser uno o varios)
     setCarrito(prev => [...prev, ...productos]);
   };
 
-  // Función para vaciar el carrito (desde Caja, después de cobrar)
   const vaciarCarrito = () => {
     setCarrito([]);
   };
+
+  const eliminarDelCarrito = (id) => {
+    setCarrito(prev => prev.filter(item => item.id !== id));
+  };
+
+  // 🚧 Pantallas fuera del flujo principal
+  if (loading) {
+    return <div className="loading">Cargando...</div>;
+  }
 
   if (showRegister) {
     return <Register onRegisterSuccess={() => setShowRegister(false)} />;
   }
 
-  if (!user) {
-    return <Login onLogin={handleLogin} onShowRegister={() => setShowRegister(true)} />;
+  if (showForgotPassword) {
+    return (
+      <div className="forgot-password-container">
+        <h2>Recuperar Contraseña</h2>
+        <p>Funcionalidad de recuperación de contraseña próximamente.</p>
+        <button className="btn-volver" onClick={() => setShowForgotPassword(false)}>Volver</button>
+      </div>
+    );
   }
 
-  // Navegación por secciones
+  if (!user) {
+    return (
+      <Login 
+        onLogin={handleLogin} 
+        onShowRegister={() => setShowRegister(true)} 
+        onShowForgotPassword={() => setShowForgotPassword(true)} 
+      />
+    );
+  }
+
+  // 🔐 Verificar acceso a secciones restringidas
+  const isAdmin = user.rol === 'admin';
+
+  if (activeSection === 'usuarios' && !isAdmin) {
+    // Redirigir o mostrar error
+    alert('Acceso denegado. Solo los administradores pueden gestionar usuarios.');
+    setActiveSection('home');
+    return null;
+  }
+
+  // 🧭 Navegación principal
   switch (activeSection) {
     case 'caja':
       return (
@@ -59,23 +146,26 @@ function App() {
     case 'tomarPedido':
       return (
         <TomarPedido
-          carritoActual={carrito} // Opcional: para mostrar vista previa
+          carritoActual={carrito}
           onAgregarAlCarrito={agregarAlCarrito}
+          onEliminarDelCarrito={eliminarDelCarrito} 
           onIrACaja={() => setActiveSection('caja')}
           onBack={() => setActiveSection('home')}
         />
       );
 
     case 'pedidos':
-      return <div className="pedido-container">Pedidos (próximamente)</div>;
-    case 'productos':
-      return <div className="pedido-container">Productos (próximamente)</div>;
-    case 'usuarios':
-      return <div className="pedido-container">Usuarios (solo admin)</div>;
-    case 'configuracion':
-      return <div className="pedido-container">Configuración</div>;
+      return <Pedidos onBack={() => setActiveSection('home')} />;
 
-    case 'home':
+    case 'productos':
+      return <ProductosModule onBack={() => setActiveSection('home')} />;
+
+    case 'usuarios':
+      return <UsuariosModule onBack={() => setActiveSection('home')} />;
+
+    case 'configuracion':
+      return <Configuracion onBack={() => setActiveSection('home')} />;
+
     default:
       return (
         <Dashboard

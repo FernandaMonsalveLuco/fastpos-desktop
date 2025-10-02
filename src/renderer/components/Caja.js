@@ -83,10 +83,13 @@ const Caja = ({ user, carrito, onBack, onVaciarCarrito }) => {
           padding: '16px',
           border: '1px solid #ddd',
           borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(90, 90, 90, 0.45)',
           backgroundColor: '#f9f9f9',
+                    margin: '20px auto',
+          backgroundColor: '#fff',
         }}
       >
-        <h2 style={{ textAlign: 'center', marginBottom: '16px' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: '16px', fontWeight: 'bold' }}>
           Caja - Pizzería FastPOS
         </h2>
         <h3 style={{ marginBottom: '12px' }}>Orden</h3>
@@ -127,6 +130,7 @@ const Caja = ({ user, carrito, onBack, onVaciarCarrito }) => {
           border: '1px solid #ddd',
           borderRadius: '8px',
           backgroundColor: '#f9f9f9',
+          boxShadow: '0 2px 8px rgba(90, 90, 90, 0.45)',
         }}
       >
         <div
