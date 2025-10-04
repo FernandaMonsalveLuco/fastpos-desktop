@@ -83,12 +83,12 @@ const Login = ({ onLogin, onShowRegister, onShowForgotPassword }) => {
           {loading ? 'Iniciando...' : 'Iniciar Sesión'}
         </button>
       </form>
-      <div className="forgot-password" style={{ marginBottom: '12px' }}>
+      <div className="forgot-password" style={{ marginBottom: '12px', textAlign: 'center' }}>
   ¿Olvidaste tu contraseña?{' '}
   <span 
     className="forgot-link" 
     onClick={onShowForgotPassword}
-    style={{ fontWeight: 'bold', color: '#e0a800', cursor: 'pointer' }}
+    style={{ fontWeight: 'bold', color: '#e0a800', cursor: 'pointer'}}
   >
     Recuperar
   </span>

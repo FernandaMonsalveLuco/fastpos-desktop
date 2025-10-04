@@ -29,6 +29,7 @@ ChartJS.register(
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { color } from 'chart.js/helpers';
 
 const Dashboard = ({ user, onLogout, onSectionChange }) => {
   const [metrics, setMetrics] = useState({
@@ -39,8 +40,8 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     topProductos: [],
     ventas7Dias: {
       labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-       [0, 0, 0, 0, 0, 0, 0]
-    };
+      data: [0, 0, 0, 0, 0, 0, 0]
+    },
     ventasPorCajero: []
   });
   const [loading, setLoading] = useState(true);
@@ -154,7 +155,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
           topProductos,
           ventas7Dias: {
             labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-             ventasPorDia
+            data: ventasPorDia
           },
           ventasPorCajero
         });
@@ -173,9 +174,9 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
   const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
 
   const doughnutData = {
-    labels: metrics.ventasPorCajero.map(c => c.nombre), // ✅ era .map(c => c.total) → debe ser nombre
+    labels: metrics.ventasPorCajero.map(c => c.nombre),
     datasets: [{
-       metrics.ventasPorCajero.map(c => c.total),
+      data: metrics.ventasPorCajero.map(c => c.total),
       backgroundColor: ['#D96704', '#400101', '#F2A81D', '#a60303', '#6c757d'],
       borderWidth: 2,
       borderColor: '#fff'
@@ -186,7 +187,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     labels: metrics.topProductos.map(p => p.nombre || 'Producto'),
     datasets: [{
       label: 'Unidades vendidas',
-       metrics.topProductos.map(p => p.vendidos || 0),
+      data: metrics.topProductos.map(p => p.vendidos || 0),
       backgroundColor: '#D96704',
       borderColor: '#400101',
       borderWidth: 1,
@@ -197,7 +198,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     labels: metrics.ventas7Dias.labels,
     datasets: [{
       label: 'Ventas diarias ($)',
-       metrics.ventas7Dias.data,
+      data: metrics.ventas7Dias.data,
       borderColor: '#D96704',
       backgroundColor: 'rgba(217, 103, 4, 0.1)',
       tension: 0.3,
@@ -207,6 +208,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: { position: 'top' },
       tooltip: { mode: 'index', intersect: false },
@@ -263,7 +265,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
             {loading ? (
               <p>Cargando...</p>
             ) : metrics.ventasPorCajero.length > 0 ? (
-              <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false }} />
+              <Doughnut data={doughnutData} options={{ ...options, plugins: { legend: { position: 'bottom' } } }} />
             ) : (
               <p>No hay ventas registradas.</p>
             )}
@@ -273,10 +275,10 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
             <h3>Tendencia de Ventas (Últimos 7 días)</h3>
             {loading ? (
               <p>Cargando...</p>
-            ) : Array.isArray(metrics.ventas7Dias?.data) && metrics.ventas7Dias.data.some(v => v > 0) ? (
+            ) : Array.isArray(metrics.ventas7Dias?.data) ? (
               <Line data={lineData} options={options} />
             ) : (
-              <p>Sin ventas en los últimos 7 días.</p>
+              <p>Sin datos de ventas.</p>
             )}
           </div>
 

@@ -11,27 +11,35 @@ const Pedidos = ({ onBack }) => {
 
   useEffect(() => {
     const cargarPedidos = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        let q = query(
-          collection(db, 'ventas'),
-          orderBy('fecha', 'desc')
-        );
+        let q;
 
-        if (filtroEstado !== 'todos') {
-          q = query(q, where('estado', '==', filtroEstado));
+        if (filtroEstado === 'todos') {
+          q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'));
+        } else {
+          q = query(
+            collection(db, 'ventas'),
+            where('estado', '==', filtroEstado),
+            orderBy('fecha', 'desc')
+          );
         }
 
         const querySnapshot = await getDocs(q);
-        const lista = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          fecha: doc.data().fecha?.toDate ? doc.data().fecha.toDate() : null
-        }));
+        const lista = querySnapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            fecha: data.fecha?.toDate ? data.fecha.toDate() : null
+          };
+        });
 
         setPedidos(lista);
       } catch (err) {
         console.error('Error al cargar pedidos:', err);
-        setError('No se pudieron cargar los pedidos');
+        setError('No se pudieron cargar los pedidos. Revisa la consola para más detalles.');
       } finally {
         setLoading(false);
       }
@@ -47,8 +55,19 @@ const Pedidos = ({ onBack }) => {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false
     }).format(fecha);
+  };
+
+  // Mapeo legible de estados
+  const obtenerTextoEstado = (estado) => {
+    switch (estado) {
+      case 'completada': return 'Completado';
+      case 'pendiente': return 'Pendiente';
+      case 'cancelada': return 'Cancelado';
+      default: return estado || 'Desconocido';
+    }
   };
 
   return (
@@ -57,8 +76,12 @@ const Pedidos = ({ onBack }) => {
       <button className="btn-volver" onClick={onBack}>Volver</button>
 
       <div className="filtros-pedidos">
-        <label>Filtrar por estado:</label>
-        <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
+        <label htmlFor="filtro-estado">Filtrar por estado:</label>
+        <select
+          id="filtro-estado"
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value)}
+        >
           <option value="todos">Todos</option>
           <option value="completada">Completados</option>
           <option value="pendiente">Pendientes</option>
@@ -71,7 +94,9 @@ const Pedidos = ({ onBack }) => {
       {loading ? (
         <p>Cargando pedidos...</p>
       ) : pedidos.length === 0 ? (
-        <p>No hay pedidos {filtroEstado !== 'todos' ? `con estado "${filtroEstado}"` : ''}.</p>
+        <p>
+          No hay pedidos{filtroEstado !== 'todos' ? ` con estado "${obtenerTextoEstado(filtroEstado)}"` : ''}.
+        </p>
       ) : (
         <div className="lista-pedidos">
           {pedidos.map(pedido => (
@@ -79,20 +104,18 @@ const Pedidos = ({ onBack }) => {
               <div className="pedido-header">
                 <strong>Pedido #{pedido.id.substring(0, 6)}</strong>
                 <span className={`estado-badge ${pedido.estado}`}>
-                  {pedido.estado === 'completada' ? 'Completado' :
-                   pedido.estado === 'pendiente' ? 'Pendiente' :
-                   'Cancelado'}
+                  {obtenerTextoEstado(pedido.estado)}
                 </span>
               </div>
               <div className="pedido-detalles">
                 <p><strong>Fecha:</strong> {formatearFecha(pedido.fecha)}</p>
                 <p><strong>Cajero:</strong> {pedido.cajeroNombre || '—'}</p>
-                <p><strong>Total:</strong> ${pedido.total?.toLocaleString() || '0'}</p>
+                <p><strong>Total:</strong> ${pedido.total?.toLocaleString('es-ES') || '0'}</p>
                 <p><strong>Productos:</strong></p>
                 <ul className="productos-lista">
                   {pedido.productos?.map((prod, i) => (
-                    <li key={i}>
-                      {prod.cantidad}x {prod.nombre} — ${prod.subtotal?.toLocaleString()}
+                    <li key={`${pedido.id}-prod-${i}`}>
+                      {prod.cantidad}x {prod.nombre} — ${prod.subtotal?.toLocaleString('es-ES') || '0'}
                     </li>
                   ))}
                 </ul>

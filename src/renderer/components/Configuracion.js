@@ -3,14 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
+// Configuración predeterminada (plantilla)
+const CONFIG_DEFAULT = {
+  nombreNegocio: 'FastPOS',
+  impuesto: 19,
+  moneda: 'COP',
+  modoImpresion: 'ticket',
+  notificaciones: true
+};
+
 const Configuracion = ({ onBack }) => {
-  const [config, setConfig] = useState({
-    nombreNegocio: 'FastPOS',
-    impuesto: 19,
-    moneda: 'COP',
-    modoImpresion: 'ticket',
-    notificaciones: true
-  });
+  const [config, setConfig] = useState(CONFIG_DEFAULT);
   const [loading, setLoading] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState('');
@@ -21,10 +24,24 @@ const Configuracion = ({ onBack }) => {
         const docRef = doc(db, 'config', 'app');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setConfig(docSnap.data());
+          // Fusionar datos de Firestore con valores predeterminados
+          const data = docSnap.data();
+          const configConValores = {
+            ...CONFIG_DEFAULT,
+            ...data,
+            // Asegurar que impuesto sea número
+            impuesto: typeof data.impuesto === 'number' ? data.impuesto : CONFIG_DEFAULT.impuesto,
+            // Asegurar booleano
+            notificaciones: Boolean(data.notificaciones)
+          };
+          setConfig(configConValores);
+        } else {
+          // Si no existe el documento, usar valores por defecto
+          setConfig(CONFIG_DEFAULT);
         }
       } catch (error) {
         console.error('Error al cargar configuración:', error);
+        setConfig(CONFIG_DEFAULT);
       } finally {
         setLoading(false);
       }
@@ -37,7 +54,11 @@ const Configuracion = ({ onBack }) => {
     const { name, value, type, checked } = e.target;
     setConfig(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : type === 'number' ? parseFloat(value) : value
+      [name]: type === 'checkbox' 
+        ? checked 
+        : type === 'number' 
+          ? parseFloat(value) || 0 
+          : value
     }));
   };
 
@@ -47,6 +68,7 @@ const Configuracion = ({ onBack }) => {
     setMensaje('');
 
     try {
+      // Guardar toda la configuración (sobrescribe el documento, pero ahora es seguro)
       await setDoc(doc(db, 'config', 'app'), config);
       setMensaje('Configuración guardada exitosamente');
       setTimeout(() => setMensaje(''), 3000);
@@ -99,12 +121,13 @@ const Configuracion = ({ onBack }) => {
         </div>
 
         <div className="form-group">
-            <label>Moneda</label>
-            <select name="moneda" value={config.moneda} onChange={handleChange}>
-                <option value="CLP">Pesos Chilenos (CLP)</option>
-                <option value="USD">Dólares (USD)</option>
-                <option value="EUR">Euros (EUR)</option>
-            </select>
+          <label>Moneda</label>
+          <select name="moneda" value={config.moneda} onChange={handleChange}>
+            <option value="CLP">Pesos Chilenos (CLP)</option>
+            <option value="USD">Dólares (USD)</option>
+            <option value="EUR">Euros (EUR)</option>
+            <option value="COP">Pesos Colombianos (COP)</option>
+          </select>
         </div>
 
         <div className="form-group">
@@ -127,7 +150,11 @@ const Configuracion = ({ onBack }) => {
           </label>
         </div>
 
-        {mensaje && <p className={`mensaje ${mensaje.includes('Error') ? 'error' : 'success'}`}>{mensaje}</p>}
+        {mensaje && (
+          <p className={`mensaje ${mensaje.includes('Error') ? 'error' : 'success'}`}>
+            {mensaje}
+          </p>
+        )}
 
         <button
           type="submit"
