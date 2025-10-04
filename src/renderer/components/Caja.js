@@ -155,7 +155,7 @@ const Caja = ({ user, carrito, onBack, onVaciarCarrito }) => {
             {loading ? 'Procesando...' : 'Pagar Pedido'}
           </button>
           <button className="btn-volver" onClick={onBack}>
-            ← Volver
+            Volver
           </button>
         </div>
       </div>

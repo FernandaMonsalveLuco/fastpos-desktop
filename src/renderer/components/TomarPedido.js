@@ -92,7 +92,7 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
     <div className="tomar-pedido-container">
       <div className="pedido-header">
         <button className="btn-volver" onClick={onBack}>
-          ← Volver
+          Volver
         </button>
         <h2>Tomar Pedido</h2>
       </div>
@@ -144,7 +144,6 @@ const TomarPedido = ({ carritoActual = [], onAgregarAlCarrito, onIrACaja, onBack
                           onClick={() => eliminarProducto(item.id)}
                           aria-label="Eliminar producto"
                         >
-                          ×
                         </button>
                       </div>
                     </div>

@@ -61,7 +61,7 @@ const Configuracion = ({ onBack }) => {
   if (loading) {
     return (
       <div className="configuracion-module">
-        <button className="btn-volver" onClick={onBack}>← Volver</button>
+        <button className="btn-volver" onClick={onBack}>Volver</button>
         <p>Cargando configuración...</p>
       </div>
     );

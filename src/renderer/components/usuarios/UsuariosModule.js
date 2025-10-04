@@ -144,11 +144,14 @@ const UsuariosModule = ({ onBack }) => {
   return (
     <div className="usuarios-module">
       <h2>Gestión de Usuarios</h2>
-      <button className="btn-volver" onClick={onBack}>← Volver</button>
+      
 
       <div className="acciones-usuarios">
         <button className="btn-agregar" onClick={() => setShowForm(true)}>
           {editando ? 'Editar Usuario' : 'Agregar Usuario'}
+        </button>
+        <button className="btn-volver" onClick={onBack}>
+          Volver
         </button>
       </div>
 

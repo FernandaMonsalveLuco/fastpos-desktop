@@ -120,12 +120,13 @@ const ProductosModule = ({ onBack }) => {
   return (
     <div className="productos-module">
       <h2>Gestión de Productos</h2>
-      <button className="btn-volver" onClick={onBack}>← Volver</button>
+      
 
       <div className="acciones-productos">
         <button className="btn-agregar" onClick={() => setShowForm(true)}>
           {editando ? 'Editar Producto' : 'Agregar Producto'}
         </button>
+        <button className="btn-volver" onClick={onBack}> Volver</button>
       </div>
 
       {showForm && (
@@ -171,7 +172,7 @@ const ProductosModule = ({ onBack }) => {
       {loading ? (
         <p>Cargando productos...</p>
       ) : (
-        <div className="lista-productos">
+        <div className="productos-lista">
           {productos.length === 0 ? (
             <p>No hay productos registrados.</p>
           ) : (

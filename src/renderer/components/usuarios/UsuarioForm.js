@@ -20,7 +20,6 @@ const UsuarioForm = ({ initialValues, roles, onSubmit, onCancel, isEditing }) =>
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // ✅ Validar usando "name", no "nombre"
     if (!formData.name || !formData.email) {
       alert('Nombre y correo son obligatorios.');
       return;
@@ -45,8 +44,8 @@ const UsuarioForm = ({ initialValues, roles, onSubmit, onCancel, isEditing }) =>
           <label>Nombre completo</label>
           <input
             type="text"
-            name="name"               // ✅ coincide con el estado
-            value={formData.name}     // ✅
+            name="name"               
+            value={formData.name}     
             onChange={handleChange}
             required
           />

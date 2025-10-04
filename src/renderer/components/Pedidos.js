@@ -54,7 +54,7 @@ const Pedidos = ({ onBack }) => {
   return (
     <div className="pedidos-module">
       <h2>Gestión de Pedidos</h2>
-      <button className="btn-volver" onClick={onBack}>← Volver</button>
+      <button className="btn-volver" onClick={onBack}>Volver</button>
 
       <div className="filtros-pedidos">
         <label>Filtrar por estado:</label>
