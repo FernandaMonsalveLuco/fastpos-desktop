@@ -11,7 +11,10 @@ import {
   Tooltip,
   Legend,
   Filler,
+<<<<<<< HEAD
   ArcElement,
+=======
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 } from 'chart.js';
 ChartJS.register(
   CategoryScale,
@@ -22,6 +25,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
+<<<<<<< HEAD
   Filler,
   ArcElement
 );
@@ -32,6 +36,17 @@ import { db } from '../firebase';
 import { color } from 'chart.js/helpers';
 
 const Dashboard = ({ user, onLogout, onSectionChange }) => {
+=======
+  Filler
+);
+
+import { Bar, Line } from 'react-chartjs-2';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+
+const Dashboard = ({ user, onLogout, onSectionChange }) => {
+  // Estado inicial con valores por defecto visibles
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   const [metrics, setMetrics] = useState({
     ventasHoy: 0,
     pedidosHoy: 0,
@@ -41,8 +56,12 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     ventas7Dias: {
       labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
       data: [0, 0, 0, 0, 0, 0, 0]
+<<<<<<< HEAD
     },
     ventasPorCajero: []
+=======
+    }
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   });
   const [loading, setLoading] = useState(true);
 
@@ -56,6 +75,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
   ];
 
   useEffect(() => {
+<<<<<<< HEAD
     const fetchMetricsFromData = async () => {
       try {
         const ventasSnapshot = await getDocs(collection(db, 'ventas'));
@@ -161,18 +181,74 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
         });
       } catch (error) {
         console.error('Error al calcular métricas:', error);
+=======
+    const fetchMetrics = async () => {
+      try {
+        const metricsDoc = await getDoc(doc(db, 'metrics', 'resumen'));
+        if (metricsDoc.exists()) {
+          const data = metricsDoc.data();
+          setMetrics({
+            ventasHoy: typeof data.ventasHoy === 'number' ? data.ventasHoy : 0,
+            pedidosHoy: typeof data.pedidosHoy === 'number' ? data.pedidosHoy : 0,
+            ticketPromedio: typeof data.ticketPromedio === 'number' ? data.ticketPromedio : 0,
+            pedidosPendientes: typeof data.pedidosPendientes === 'number' ? data.pedidosPendientes : 0,
+            topProductos: Array.isArray(data.topProductos) ? data.topProductos : [],
+            ventas7Dias: {
+              labels: Array.isArray(data.ventas7Dias?.labels) && data.ventas7Dias.labels.length === 7
+                ? data.ventas7Dias.labels
+                : ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+              data: Array.isArray(data.ventas7Dias?.data) && data.ventas7Dias.data.length === 7
+                ? data.ventas7Dias.data.map(v => (typeof v === 'number' ? v : 0))
+                : [0, 0, 0, 0, 0, 0, 0]
+            }
+          });
+        } else {
+          // Documento no existe → usar valores por defecto
+          setMetrics({
+            ventasHoy: 0,
+            pedidosHoy: 0,
+            ticketPromedio: 0,
+            pedidosPendientes: 0,
+            topProductos: [],
+            ventas7Dias: {
+              labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+               data: [0, 0, 0, 0, 0, 0, 0]
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar métricas:', error);
+        // En caso de error (ej. permisos), mostrar valores por defecto
+        setMetrics({
+          ventasHoy: 0,
+          pedidosHoy: 0,
+          ticketPromedio: 0,
+          pedidosPendientes: 0,
+          topProductos: [],
+          ventas7Dias: {
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            data: [0, 0, 0, 0, 0, 0, 0]
+          }
+        });
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
       } finally {
         setLoading(false);
       }
     };
 
+<<<<<<< HEAD
     fetchMetricsFromData();
     const interval = setInterval(fetchMetricsFromData, 30000);
+=======
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 30000);
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
     return () => clearInterval(interval);
   }, []);
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
 
+<<<<<<< HEAD
   const doughnutData = {
     labels: metrics.ventasPorCajero.map(c => c.nombre),
     datasets: [{
@@ -183,11 +259,17 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     }]
   };
 
+=======
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   const barData = {
     labels: metrics.topProductos.map(p => p.nombre || 'Producto'),
     datasets: [{
       label: 'Unidades vendidas',
+<<<<<<< HEAD
       data: metrics.topProductos.map(p => p.vendidos || 0),
+=======
+      data: metrics.topProductos.map(p => (typeof p.vendidos === 'number' ? p.vendidos : 0)),
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
       backgroundColor: '#D96704',
       borderColor: '#400101',
       borderWidth: 1,
@@ -208,7 +290,10 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
 
   const options = {
     responsive: true,
+<<<<<<< HEAD
     maintainAspectRatio: false,
+=======
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
     plugins: {
       legend: { position: 'top' },
       tooltip: { mode: 'index', intersect: false },
@@ -240,6 +325,10 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
       </header>
 
       <main className="dashboard-main">
+<<<<<<< HEAD
+=======
+        {/* Siempre mostrar las métricas, incluso durante la carga */}
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
         <div className="metrics-grid">
           <div className="metric-card">
             <div className="metric-label">Ventas Hoy</div>
@@ -261,6 +350,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
 
         <div className="charts-row">
           <div className="chart-card">
+<<<<<<< HEAD
             <h3>Ventas por Cajero</h3>
             {loading ? (
               <p>Cargando...</p>
@@ -290,6 +380,25 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
               <Bar data={barData} options={options} />
             ) : (
               <p>No hay productos vendidos.</p>
+=======
+            <h3>Tendencia de Ventas (Últimos 7 días)</h3>
+            {loading ? (
+              <p>Cargando datos...</p>
+            ) : metrics.ventas7Dias.data.some(v => v > 0) ? (
+              <Line data={lineData} options={options} />
+            ) : (
+              <p>Sin ventas registradas en los últimos 7 días.</p>
+            )}
+          </div>
+          <div className="chart-card">
+            <h3>Productos Más Vendidos (Mes)</h3>
+            {loading ? (
+              <p>Cargando datos...</p>
+            ) : metrics.topProductos.length > 0 ? (
+              <Bar data={barData} options={options} />
+            ) : (
+              <p>No hay productos con ventas aún.</p>
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
             )}
           </div>
         </div>
@@ -298,4 +407,8 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
   );
 };
 
+<<<<<<< HEAD
 export default Dashboard;
+=======
+export default Dashboard;
+>>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
