@@ -155,11 +155,7 @@ const Caja = ({ user, carrito, onBack, onVaciarCarrito }) => {
             {loading ? 'Procesando...' : 'Pagar Pedido'}
           </button>
           <button className="btn-volver" onClick={onBack}>
-<<<<<<< HEAD
             Volver
-=======
-            ← Volver
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
           </button>
         </div>
       </div>

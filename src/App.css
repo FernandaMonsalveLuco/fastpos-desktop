@@ -18,10 +18,6 @@ body {
 .app-container,
 .login-container,
 .tomar-pedido-container,
-<<<<<<< HEAD
-=======
-.caja-container,
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 .dashboard-container {
   min-height: 100px;
   max-width: 1200px;
@@ -38,11 +34,7 @@ body {
   padding: 16px 24px;
   background: #400101;
   color: white;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   position: sticky;
   top: 0;
   z-index: 100;
@@ -128,12 +120,7 @@ body {
   color: white;
   padding: 20px;
   text-align: center;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 8px rgba(99, 99, 99, 0.5);
-  transition: transform 0.2s;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 .metric-card1 {
@@ -141,11 +128,7 @@ body {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 8px rgba(99, 99, 99, 0.5);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   transition: transform 0.2s;
 }
 
@@ -154,11 +137,7 @@ body {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 8px rgba(99, 99, 99, 0.5);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   transition: transform 0.2s;
 }
 
@@ -167,11 +146,7 @@ body {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 8px rgba(99, 99, 99, 0.5);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   transition: transform 0.2s;
 }
 
@@ -206,7 +181,6 @@ body {
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 20px;
 }
-<<<<<<< HEAD
 /* === DASHBOARD - CHARTS BENTO LAYOUT === */
 
 .charts-row {
@@ -267,32 +241,18 @@ body {
     max-height: 180px;
   }
 }
-=======
-
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 .dashboard-card {
   background: white;
   border-radius: 16px;
   padding: 24px;
   text-align: center;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
   cursor: pointer;
-=======
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-  border: 2px solid #f0f0f0;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 .dashboard-card:hover {
   transform: translateY(-6px);
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   border-color: #D96704;
 }
 
@@ -315,12 +275,7 @@ body {
   padding: 30px;
   background: white;
   border-radius: 16px;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  text-align: center;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 .login-container h2 {
@@ -355,14 +310,8 @@ body {
 .form-group input:focus {
   outline: none;
   border-color: #D96704;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
 }
-=======
-  box-shadow: 0 0 0 2px rgba(217, 103, 4, 0.2);
-}
-
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 .btn-ingresar {
   background: #D96704;
   color: white;
@@ -401,7 +350,6 @@ body {
 
 /* === BOTONES GLOBALES === */
 
-<<<<<<< HEAD
 .btn-volver, .btn-pagar {
     background: #400101;
     color: white;
@@ -477,39 +425,6 @@ body {
   margin-bottom: 5pv;
   border-radius: 10px;
   align-content: center;
-=======
-.btn-volver {
-  background: #400101;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-volver:hover {
-  background: #2d0000;
-}
-
-.btn-pagar {
-  background: #400101;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-/* === TOMAR PEDIDO === */
-
-.tomar-pedido-container {
-  background: #F2A81D;
-  min-height: 100vh;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -540,7 +455,6 @@ body {
   flex: 1;
   max-width: 50%;
 }
-<<<<<<< HEAD
 .productos-module{
   max-width: 90%;
   margin: 20px auto;
@@ -550,9 +464,6 @@ body {
   box-shadow: 0 4px 12px rgb(100, 100, 100);
   background-color: rgb(255, 255, 255);
 }
-=======
-
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 .productos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -583,11 +494,7 @@ body {
   background: #fff;
   border-radius: 12px;
   padding: 16px;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -649,7 +556,6 @@ body {
   background: #fff;
   padding: 12px;
   border-radius: 12px;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
 }
 
@@ -670,20 +576,6 @@ body {
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
     text-align: center;
-=======
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.categoria-btn {
-  background: #D96704;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 .categoria-btn.active {
@@ -698,7 +590,6 @@ body {
 /* === USUARIOS MODULE === */
 
 .usuarios-module {
-<<<<<<< HEAD
   max-width: 90%;
   margin: 20px auto;
   padding: 16px;
@@ -712,16 +603,6 @@ body {
 .usuarios-module h2 {
   margin-bottom: 20px;
   color: #000000;
-=======
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.usuarios-module h2 {
-  margin-bottom: 20px;
-  color: #333;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 .acciones-usuarios {
@@ -762,41 +643,15 @@ body {
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
-<<<<<<< HEAD
   font-weight: 500;
-=======
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 .lista-usuarios th {
   background-color: #f5f5f5;
-<<<<<<< HEAD
   font-weight: 800;
 }
 
 
-=======
-}
-
-.btn-editar,
-.btn-eliminar {
-  margin-right: 8px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-editar {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.btn-eliminar {
-  background-color: #f44336;
-  color: white;
-}
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 
 .error-form {
   color: red;
@@ -1009,11 +864,7 @@ body {
   border-radius: 10px;
   padding: 16px;
   margin-bottom: 16px;
-<<<<<<< HEAD
   box-shadow: 0 4px 12px rgb(100, 100, 100);
-=======
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   border-left: 4px solid #D96704;
 }
 
@@ -1035,14 +886,10 @@ body {
   text-align: right;
 }
 .btn-eliminar-item {
-<<<<<<< HEAD
   background: #a60303;
   border: 0.5px solid;
   border-color: #a60303;
   border-radius: 50%;
-=======
-  background: #f44336;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
   color: white;
   width: 24px;
   height: 24px;
@@ -1057,11 +904,8 @@ body {
 .btn-eliminar-item:hover {
   background: #d32f2f;
 }
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 .total-final {
   font-size: 18px;
   font-weight: bold;
@@ -1102,7 +946,6 @@ body {
   color: #400101;
 }
 
-<<<<<<< HEAD
 .productos-lista table {
   width: 100%;
   border-collapse: collapse;
@@ -1119,17 +962,6 @@ body {
 .productos-lista th {
   background-color: #f5f5f5;
   font-weight: 800;
-=======
-.productos-lista {
-  margin-top: 10px;
-  padding-left: 20px;
-  list-style-type: disc;
-}
-
-.productos-lista li {
-  margin-bottom: 4px;
-  color: #555;
->>>>>>> 86b555ffb3815af35a95898ae28bba5a43b86b8a
 }
 
 /* Responsive para móviles */

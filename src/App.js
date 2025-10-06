@@ -10,11 +10,12 @@ import UsuariosModule from './renderer/components/usuarios/UsuariosModule';
 import ProductosModule from './renderer/components/ProductosModule';
 import Pedidos from './renderer/components/Pedidos';
 import Configuracion from './renderer/components/Configuracion';
+import Recuperar from './renderer/components/auth/Recuperar'; // ✅ Importado
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(null); // Incluirá: uid, email, rol, etc.
-  const [loading, setLoading] = useState(true); // Para evitar parpadeo
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
@@ -23,11 +24,9 @@ function App() {
   const auth = getAuth();
   const db = getFirestore();
 
-  // 🔄 Escuchar estado de autenticación al cargar la app
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // ✅ Cargar datos adicionales desde Firestore
         try {
           const userDoc = await getDoc(doc(db, 'Usuarios', firebaseUser.uid));
           if (userDoc.exists()) {
@@ -39,7 +38,6 @@ function App() {
             setUser(userData);
           } else {
             console.warn('Documento de usuario no encontrado en Firestore');
-            // Opcional: redirigir a perfil para completar registro
             setUser({ uid: firebaseUser.uid, email: firebaseUser.email, rol: 'invitado' });
           }
         } catch (error) {
@@ -56,8 +54,6 @@ function App() {
   }, []);
 
   const handleLogin = async (firebaseUser) => {
-    // Este flujo ya debería haber cargado el user vía onAuthStateChanged
-    // Pero si usas login manual, repite la lógica:
     try {
       const userDoc = await getDoc(doc(db, 'Usuarios', firebaseUser.uid));
       const userData = {
@@ -77,7 +73,6 @@ function App() {
 
   const handleLogout = async () => {
     await auth.signOut();
-    // onAuthStateChanged se encargará de limpiar el estado
   };
 
   const agregarAlCarrito = (productos) => {
@@ -92,23 +87,19 @@ function App() {
     setCarrito(prev => prev.filter(item => item.id !== id));
   };
 
-  // 🚧 Pantallas fuera del flujo principal
   if (loading) {
     return <div className="loading">Cargando...</div>;
   }
 
+  // 🔁 Manejo de vistas fuera del dashboard
   if (showRegister) {
+    // Asegúrate de tener el componente Register importado si lo usas
     return <Register onRegisterSuccess={() => setShowRegister(false)} />;
   }
 
   if (showForgotPassword) {
-    return (
-      <div className="forgot-password-container">
-        <h2>Recuperar Contraseña</h2>
-        <p>Funcionalidad de recuperación de contraseña próximamente.</p>
-        <button className="btn-volver" onClick={() => setShowForgotPassword(false)}>Volver</button>
-      </div>
-    );
+    // ✅ Usa tu nuevo componente Recuperar
+    return <Recuperar onBack={() => setShowForgotPassword(false)} />;
   }
 
   if (!user) {
@@ -121,17 +112,14 @@ function App() {
     );
   }
 
-  // 🔐 Verificar acceso a secciones restringidas
   const isAdmin = user.rol === 'admin';
 
   if (activeSection === 'usuarios' && !isAdmin) {
-    // Redirigir o mostrar error
     alert('Acceso denegado. Solo los administradores pueden gestionar usuarios.');
     setActiveSection('home');
     return null;
   }
 
-  // 🧭 Navegación principal
   switch (activeSection) {
     case 'caja':
       return (
