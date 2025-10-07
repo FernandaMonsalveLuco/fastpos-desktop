@@ -65,6 +65,9 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
           fecha: doc.data().fecha?.toDate ? doc.data().fecha.toDate() : new Date()
         }));
 
+        console.log('Estados encontrados:', ventas.map(v => v.estado).filter(Boolean));
+        console.log('Estados únicos:', [...new Set(ventas.map(v => v.estado))]);
+
         const usuariosSnapshot = await getDocs(collection(db, 'Usuarios'));
         const usuariosMap = {};
         usuariosSnapshot.docs.forEach(doc => {
@@ -97,9 +100,13 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
             };
           }
 
-          if (venta.estado === 'pendiente') {
-            pedidosPendientes++;
-          }
+          const estadoVenta = venta.estado;
+            if (typeof estadoVenta === 'string') {
+              const estadoNormalizado = estadoVenta.trim().toLowerCase();
+              if (estadoNormalizado === 'pendiente') {
+                pedidosPendientes++;
+              }
+            }
 
           cajerosVentas[cajeroId].total += totalVenta;
           cajerosVentas[cajeroId].pedidos += 1;

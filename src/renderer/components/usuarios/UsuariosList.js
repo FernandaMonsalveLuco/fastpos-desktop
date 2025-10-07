@@ -3,11 +3,14 @@ import React from 'react';
 
 const UsuariosList = ({ usuarios, loading, onEdit, onDelete, roles }) => {
   const getRoleLabel = (rol) => {
+    if (!rol) return 'Sin rol';
     const role = roles.find(r => r.value === rol);
     return role ? role.label : rol;
   };
 
-  if (loading) return <p>Cargando usuarios...</p>;
+  if (loading) {
+    return <p className="loading-text">Cargando usuarios...</p>;
+  }
 
   return (
     <div className="usuarios-list">
@@ -15,7 +18,7 @@ const UsuariosList = ({ usuarios, loading, onEdit, onDelete, roles }) => {
         <thead>
           <tr>
             <th>Nombre</th>
-            <th>Correo</th>
+            <th>Correo Electrónico</th>
             <th>Rol</th>
             <th>Estado</th>
             <th>Acciones</th>
@@ -24,26 +27,40 @@ const UsuariosList = ({ usuarios, loading, onEdit, onDelete, roles }) => {
         <tbody>
           {usuarios.length === 0 ? (
             <tr>
-              <td colSpan="5" style={{ textAlign: 'center' }}>No hay usuarios registrados.</td>
+              <td colSpan="5" className="no-data">
+                No hay usuarios registrados.
+              </td>
             </tr>
           ) : (
             usuarios.map(user => (
               <tr key={user.id}>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
+                <td>{user.name || '—'}</td>
+                <td>{user.email || '—'}</td>
                 <td>{getRoleLabel(user.rol)}</td>
                 <td>
-                  <span className={`status-badge ${user.activo ? 'activo' : 'inactivo'}`}>
-                    {user.activo ? 'Activo' : 'Inactivo'}
+                  <span
+                    className={`status-badge ${
+                      user.activo === true ? 'activo' : 'inactivo'
+                    }`}
+                    aria-label={`Usuario ${user.activo === true ? 'activo' : 'inactivo'}`}
+                  >
+                    {user.activo === true ? 'Activo' : 'Inactivo'}
                   </span>
                 </td>
-                <td>
-                  <button className="btn-small btn-edit" onClick={() => onEdit(user.id)}>
+                <td className="acciones-celda">
+                  <button
+                    type="button"
+                    className="btn-small btn-edit"
+                    onClick={() => onEdit(user.id)}
+                    aria-label={`Editar usuario ${user.name || user.email}`}
+                  >
                     Editar
                   </button>
-                  <button 
-                    className="btn-small btn-delete" 
-                    onClick={() => onDelete(user.id, user.name)} 
+                  <button
+                    type="button"
+                    className="btn-small btn-delete"
+                    onClick={() => onDelete(user.id, user.name || user.email)}
+                    aria-label={`Eliminar usuario ${user.name || user.email}`}
                   >
                     Eliminar
                   </button>

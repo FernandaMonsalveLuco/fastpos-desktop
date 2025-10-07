@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  updateEmail,
-  deleteUser as deleteAuthUser
 } from 'firebase/auth';
 import {
   collection,
@@ -15,6 +13,19 @@ import {
   deleteDoc
 } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
+
+// Mapeo de roles para mostrar etiquetas legibles
+const ROL_LABELS = {
+  admin: 'Administrador',
+  user: 'Usuario',
+  caja: 'Cajero',
+  cocina: 'Chef',
+  mesero: 'Mesero'
+};
+
+const getRolLabel = (rol) => {
+  return ROL_LABELS[rol] || rol || 'Sin rol';
+};
 
 const UsuariosModule = ({ onBack }) => {
   const [usuarios, setUsuarios] = useState([]);
@@ -29,7 +40,6 @@ const UsuariosModule = ({ onBack }) => {
     rol: 'user'
   });
 
-  // Cargar usuarios al montar
   useEffect(() => {
     const cargarUsuarios = async () => {
       try {
@@ -61,22 +71,16 @@ const UsuariosModule = ({ onBack }) => {
 
     try {
       if (editando) {
-        // Actualizar usuario existente
         const userDocRef = doc(db, 'Usuarios', editando);
         await updateDoc(userDocRef, { name, rol });
-
-        // Si el email cambió, actualizar en Auth (opcional y complejo)
-        // Por simplicidad, no permitimos cambiar email aquí
 
         setUsuarios(prev => 
           prev.map(u => u.id === editando ? { ...u, name, rol } : u)
         );
       } else {
-        // Crear nuevo usuario
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const uid = userCredential.user.uid;
 
-        // Guardar en Firestore
         await setDoc(doc(db, 'Usuarios', uid), {
           name,
           email,
@@ -87,10 +91,10 @@ const UsuariosModule = ({ onBack }) => {
         setUsuarios(prev => [...prev, { id: uid, name, email, rol }]);
       }
 
-      // Reset
       setFormData({ name: '', email: '', password: '', rol: 'user' });
       setShowForm(false);
       setEditando(null);
+      setError(null);
     } catch (err) {
       console.error('Error al guardar usuario:', err);
       let mensaje = 'Error al guardar el usuario';
@@ -110,7 +114,7 @@ const UsuariosModule = ({ onBack }) => {
     setFormData({
       name: usuario.name,
       email: usuario.email,
-      password: '', // No se muestra la contraseña
+      password: '',
       rol: usuario.rol || 'user'
     });
     setShowForm(true);
@@ -120,13 +124,7 @@ const UsuariosModule = ({ onBack }) => {
     if (!window.confirm(`¿Eliminar al usuario ${usuario.name}? Esta acción no se puede deshacer.`)) return;
 
     try {
-      // Eliminar de Firestore
       await deleteDoc(doc(db, 'Usuarios', usuario.id));
-
-      // Opcional: eliminar de Firebase Auth (requiere privilegios elevados)
-      // Nota: Esto solo funciona si el usuario actual es admin y tiene permisos
-      // En la mayoría de apps, se deja el usuario en Auth pero se elimina de Firestore
-
       setUsuarios(prev => prev.filter(u => u.id !== usuario.id));
     } catch (err) {
       console.error('Error al eliminar usuario:', err);
@@ -144,7 +142,6 @@ const UsuariosModule = ({ onBack }) => {
   return (
     <div className="usuarios-module">
       <h2>Gestión de Usuarios</h2>
-      
 
       <div className="acciones-usuarios">
         <button className="btn-agregar" onClick={() => setShowForm(true)}>
@@ -175,7 +172,7 @@ const UsuariosModule = ({ onBack }) => {
             value={formData.email}
             onChange={handleChange}
             required
-            disabled={!!editando} // No permitir cambiar email al editar
+            disabled={!!editando}
           />
           
           {!editando && (
@@ -197,6 +194,9 @@ const UsuariosModule = ({ onBack }) => {
           >
             <option value="user">Usuario</option>
             <option value="admin">Administrador</option>
+            <option value="caja">Cajero</option>
+            <option value="cocina">Chef</option>
+            <option value="mesero">Mesero</option>
           </select>
 
           {error && <p className="error-form">{error}</p>}
@@ -226,21 +226,27 @@ const UsuariosModule = ({ onBack }) => {
               </tr>
             </thead>
             <tbody>
-              {usuarios.map(usuario => (
-                <tr key={usuario.id}>
-                  <td>{usuario.name}</td>
-                  <td>{usuario.email}</td>
-                  <td>{usuario.rol === 'admin' ? 'Administrador' : 'Usuario'}</td>
-                  <td>
-                    <button className="btn-editar" onClick={() => handleEditar(usuario)}>
-                      Editar
-                    </button>
-                    <button className="btn-eliminar" onClick={() => handleEliminar(usuario)}>
-                      Eliminar
-                    </button>
-                  </td>
+              {usuarios.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center' }}>No hay usuarios registrados.</td>
                 </tr>
-              ))}
+              ) : (
+                usuarios.map(usuario => (
+                  <tr key={usuario.id}>
+                    <td>{usuario.name || '—'}</td>
+                    <td>{usuario.email || '—'}</td>
+                    <td>{getRolLabel(usuario.rol)}</td>
+                    <td>
+                      <button className="btn-editar" onClick={() => handleEditar(usuario)}>
+                        Editar
+                      </button>
+                      <button className="btn-eliminar" onClick={() => handleEliminar(usuario)}>
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

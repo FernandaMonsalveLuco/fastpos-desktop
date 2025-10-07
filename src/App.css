@@ -985,6 +985,159 @@ body {
     gap: 8px;
   }
 }
+/* === Estilos para el módulo de Recuperación de Contraseña === */
+.recuperar-container {
+  max-width: 450px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.recuperar-container h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.recuperar-container .btn-volver {
+  background: none;
+  border: none;
+  color: #e0a800;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.recuperar-container .btn-volver:hover {
+  text-decoration: underline;
+}
+
+.recuperar-container .form-group {
+  margin-bottom: 16px;
+}
+
+.recuperar-container .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #444;
+}
+
+.recuperar-container .form-group input[type="email"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.recuperar-container .form-group input[type="email"]:focus {
+  outline: none;
+  border-color: #e0a800;
+  box-shadow: 0 0 0 3px rgba(224, 168, 0, 0.2);
+}
+
+.recuperar-container .btn-enviar {
+  width: 100%;
+  padding: 12px;
+  background-color: #e0a800;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.recuperar-container .btn-enviar:hover:not(:disabled) {
+  background-color: #c99200;
+}
+
+.recuperar-container .btn-enviar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Mensajes de estado */
+.recuperar-container .success {
+  color: #28a745;
+  background-color: #d4edda;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.recuperar-container .error {
+  color: #721c24;
+  background-color: #f8d7da;
+  padding: 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Formulario de producto */
+.formulario-producto {
+  background-color: #f9f9f9;
+  padding: 24px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.formulario-producto h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 22px;
+  text-align: center;
+}
+
+.formulario-producto input[type="text"],
+.formulario-producto input[type="number"],
+.formulario-producto textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.formulario-producto input[type="text"]:focus,
+.formulario-producto input[type="number"]:focus,
+.formulario-producto textarea:focus {
+  outline: none;
+  border-color: #e0a800;
+  box-shadow: 0 0 0 3px rgba(224, 168, 0, 0.2);
+}
+
+.formulario-producto textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
 
 /* === RESPONSIVE === */
 
