@@ -1,7 +1,7 @@
 // src/renderer/components/auth/Recuperar.js
 import React, { useState } from 'react';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../../firebase'; // Ajusta la ruta si es necesario
+import { auth } from '../../firebase'; 
 
 const Recuperar = ({ onBack }) => {
   const [email, setEmail] = useState('');

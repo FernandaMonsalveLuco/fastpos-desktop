@@ -197,7 +197,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
       data: metrics.topProductos.map(p => (typeof p.vendidos === 'number' ? p.vendidos : 0)),
       backgroundColor: '#D96704',
       borderColor: '#400101',
-      borderWidth: 1,
+      borderWidth: 3,
     }],
   };
 

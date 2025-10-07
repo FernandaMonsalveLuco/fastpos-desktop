@@ -22,11 +22,10 @@ const Login = ({ onLogin, onShowRegister, onShowForgotPassword }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      // Pasamos un objeto con datos útiles a App.js
       onLogin({
         uid: user.uid,
         email: user.email,
-        name: user.displayName || email.split('@')[0], // nombre por defecto
+        name: user.displayName || email.split('@')[0], 
       });
     } catch (err) {
       console.error('Error en login:', err);

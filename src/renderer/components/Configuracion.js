@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
-// Configuración predeterminada (plantilla)
 const CONFIG_DEFAULT = {
   nombreNegocio: 'FastPOS',
   impuesto: 19,
@@ -24,19 +23,15 @@ const Configuracion = ({ onBack }) => {
         const docRef = doc(db, 'config', 'app');
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          // Fusionar datos de Firestore con valores predeterminados
           const data = docSnap.data();
           const configConValores = {
             ...CONFIG_DEFAULT,
             ...data,
-            // Asegurar que impuesto sea número
             impuesto: typeof data.impuesto === 'number' ? data.impuesto : CONFIG_DEFAULT.impuesto,
-            // Asegurar booleano
             notificaciones: Boolean(data.notificaciones)
           };
           setConfig(configConValores);
         } else {
-          // Si no existe el documento, usar valores por defecto
           setConfig(CONFIG_DEFAULT);
         }
       } catch (error) {
@@ -68,7 +63,6 @@ const Configuracion = ({ onBack }) => {
     setMensaje('');
 
     try {
-      // Guardar toda la configuración (sobrescribe el documento, pero ahora es seguro)
       await setDoc(doc(db, 'config', 'app'), config);
       setMensaje('Configuración guardada exitosamente');
       setTimeout(() => setMensaje(''), 3000);

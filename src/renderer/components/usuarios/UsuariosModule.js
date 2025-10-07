@@ -14,7 +14,6 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
 
-// Mapeo de roles para mostrar etiquetas legibles
 const ROL_LABELS = {
   admin: 'Administrador',
   user: 'Usuario',

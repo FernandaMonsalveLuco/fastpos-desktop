@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 const UsuarioForm = ({ initialValues, roles, onSubmit, onCancel, isEditing }) => {
   const [formData, setFormData] = useState({
-    name: initialValues?.name || '',          // ✅ "name", no "nombre"
+    name: initialValues?.name || '',          
     email: initialValues?.email || '',
     rol: initialValues?.rol || roles[0].value,
     activo: initialValues ? initialValues.activo !== false : true,

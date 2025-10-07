@@ -10,7 +10,8 @@ import UsuariosModule from './renderer/components/usuarios/UsuariosModule';
 import ProductosModule from './renderer/components/ProductosModule';
 import Pedidos from './renderer/components/Pedidos';
 import Configuracion from './renderer/components/Configuracion';
-import Recuperar from './renderer/components/auth/Recuperar'; // ✅ Importado
+import Recuperar from './renderer/components/auth/Recuperar';
+import TipoPago from './renderer/components/TipoPago';
 import './App.css';
 
 function App() {
