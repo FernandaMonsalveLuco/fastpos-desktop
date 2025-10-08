@@ -1,58 +1,68 @@
-/* === PALETA DE COLORES === */
+/* === PALETA DE COLORES — OCEAN BREEZE === */
 :root {
-  --primary-dark: #400101;
-  --primary-medium: #D96704;
-  --primary-light: #e0a800;
-  --secondary: #28a745;
-  --danger: #a60303;
-  --warning: #ffc107;
-  --info: #17a2b8;
-  --success: #28a745;
-  --light: #f9f9f9;
-  --dark: #212529;
-  --gray-100: #f8f9fa;
-  --gray-200: #e9ecef;
-  --gray-300: #dee2e6;
-  --gray-400: #ced4da;
-  --gray-500: #adb5bd;
-  --gray-600: #6c757d;
-  --gray-700: #495057;
-  --gray-800: #343a40;
-  --gray-900: #212529;
+  --primary-dark: #023047;        /* Azul marino profundo (texto, fondo oscuro) */
+  --primary-medium: #219EBC;      /* Turquesa vibrante (botones primarios, énfasis) */
+  --primary-light: #8ECAE6;       /* Azul claro suave (fondos, hover, elementos secundarios) */
+  --secondary: #8ECAE6;           /* Mismo que primary-light, para consistencia */
+  --danger: #FB8500;              /* Naranja cálido (alertas, eliminar, cancelar) */
+  --warning: #FFB703;             /* Amarillo dorado (advertencias, destacados) */
+  --info: #219EBC;                /* Turquesa (información, estado activo) */
+  --success: #00c853;             /* Verde vibrante (éxito — lo mantenemos como está) */
+  --light: #f0f8ff;               /* Fondo muy claro con tono azulado (alternativo al blanco) */
+  --dark: #023047;                /* Mismo que primary-dark para textos y bordes oscuros */
+  --gray-100: #1b263b;       /* Fondo de tarjetas / secciones */
+  --gray-200: #222f45;
+  --gray-300: #2a3b55;
+  --gray-400: #3b506e;
+  --gray-500: #5a7398;
+  --gray-600: #8a9eb1;
+  --gray-700: #b0c4d6;
+  --gray-800: #d0e0f0;
+  --gray-900: #e0f7fa;
   --white: #ffffff;
   --black: #000000;
-  --border-color: #ddd;
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --border-color: #b3d4fc;        /* Borde azul claro, suave */
+  --shadow: 0 4px 12px rgba(2, 48, 71, 0.15); /* Sombra en tono azul marino */
   --transition: all 0.2s ease;
 }
 
 /* === MODO OSCURO === */
 [data-theme="dark"] {
-  --primary-dark: #e0a800;
-  --primary-medium: #ffcc80;
-  --primary-light: #fff3cd;
-  --secondary: #66bb6a;
-  --danger: #ef5350;
-  --warning: #ffa726;
-  --info: #4fc3f7;
-  --success: #66bb6a;
-  --light: #121212;
-  --dark: #ffffff;
-  --gray-100: #1e1e1e;
-  --gray-200: #2d2d2d;
-  --gray-300: #3d3d3d;
-  --gray-400: #4d4d4d;
-  --gray-500: #5d5d5d;
-  --gray-600: #8d8d8d;
-  --gray-700: #bfbfbf;
-  --gray-800: #e0e0e0;
-  --gray-900: #ffffff;
-  --white: #121212;
-  --black: #ffffff;
-  --border-color: #444;
-  --shadow: 0 4px 12px rgba(126, 126, 126, 0.555);
-}
+  /* Fondo principal oscuro con ligero tono azulado (no negro puro) */
+  --light: #0d1b2a;          /* Azul muy oscuro (fondo general) */
+  --dark: #e0f7fa;           /* Texto claro suave (casi blanco, pero más cálido) */
 
+  /* Colores primarios adaptados al modo oscuro */
+  --primary-dark: #8ECAE6;   /* Mantenemos el azul marino como acento oscuro */
+  --primary-medium: #219EBC; /* Turquesa vibrante (igual que en modo claro, funciona bien) */
+  --primary-light: #023047;  /* Azul claro (igual, se ve bien sobre fondo oscuro) */
+
+  /* Secundarios y estados */
+  --secondary: #FFB703;      /* Usamos el amarillo dorado como secundario (destaca más en oscuro) */
+  --warning: #FFB703;        /* Advertencias: amarillo dorado */
+  --danger: #FB8500;         /* Naranja cálido (mantiene contraste y coherencia) */
+  --info: #219EBC;           /* Turquesa para info */
+  --success: #66bb6a;        /* Verde suave (legible en oscuro) */
+
+  /* Escala de grises adaptada */
+  --gray-900: #1b263b;       /* Fondo de tarjetas / secciones */
+  --gray-800: #222f45;
+  --gray-700: #2a3b55;
+  --gray-600: #3b506e;
+  --gray-500: #5a7398;
+  --gray-400: #8a9eb1;
+  --gray-300: #b0c4d6;
+  --gray-200: #d0e0f0;
+  --gray-100: #e0f7fa;
+
+  /* Invertimos blanco/negro */
+  --white: #0d1b2a;          /* Fondo oscuro */
+  --black: #e0f7fa;          /* Texto claro */
+
+  /* Borde y sombra */
+  --border-color: #3b506e;   /* Gris azulado suave */
+  --shadow: 0 4px 12px rgba(2, 48, 71, 0.4); /* Sombra profunda pero no agresiva */
+}
 /* === RESET Y FUENTES === */
 * {
   margin: 0;
@@ -70,7 +80,6 @@ body {
 
 /* === CONTENEDORES GENERALES === */
 .app-container,
-.login-container,
 .tomar-pedido-container,
 .dashboard-container {
   min-height: 100vh;
@@ -78,8 +87,11 @@ body {
   margin: 0 auto;
   border-radius: 12px;
   padding: 40px;
-  background: #808080;
+  background: var(--white);
   transition: background 0.3s ease;
+}
+.login-container{
+  min-height: auto;
 }
 
 /* === DASHBOARD - NAVEGACIÓN === */
@@ -130,8 +142,8 @@ body {
 }
 
 .nav-action-btn:hover {
-  background: var(--gray-700);
-  color: var(--primary-light);
+  background: var(--white);
+  color: var(--dark);
 }
 
 .navbar-user {
@@ -252,7 +264,7 @@ body {
 }
 
 .chart-card {
-  background: linear-gradient(327deg, var(--light) 0%, #b9b9b9 100%);
+  background: var(--light);
   border-radius: 16px;
   padding: 16px;
   box-shadow: var(--shadow);
@@ -459,7 +471,7 @@ body {
 
 .btn-editar,
 .btn-agregar {
-  background: var(--secondary);
+  background: var(--primary-medium);
   color: var(--white);
   margin-top: 10px;
   margin-bottom: 10px;
@@ -467,7 +479,7 @@ body {
   padding: 14px;
   border-radius: 12px;
   border: 2px solid;
-  border-color: var(--secondary);
+  border-color: var(--primary-medium);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -485,8 +497,8 @@ body {
 .btn-editar:hover,
 .btn-agregar:hover {
   background-color: var(--white);
-  color: var(--secondary);
-  border: 2px solid var(--secondary);
+  color: var(--primary-medium);
+  border: 2px solid var(--primary-medium);
 }
 
 .btn-pagar:hover {
@@ -653,7 +665,7 @@ body {
 }
 
 .categoria-btn {
-  width: 150px;
+  width: 200px;
   padding: 14px;
   margin-bottom: 8px;
   background: var(--primary-medium);
@@ -747,6 +759,7 @@ body {
 
 .lista-usuarios th {
   background-color: var(--gray-100);
+  color: var(--gray-900);
   font-weight: 800;
 }
 
@@ -932,6 +945,24 @@ body {
 }
 
 /* === PEDIDOS MODULE === */
+.acciones-pedido {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.acciones-pedido select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.loading-indicator {
+  font-size: 0.9em;
+  color: #666;
+  margin-left: 8px;
+}
 .pedidos-module {
   padding: 20px;
   max-width: 1000px;
@@ -1094,6 +1125,7 @@ body {
 
 .productos-lista th {
   background-color: var(--gray-100);
+  color: var(--gray-900);
   font-weight: 800;
 }
 
@@ -1392,6 +1424,25 @@ body {
   font-size: 22px;
   text-align: center;
   transition: color 0.3s ease;
+}
+
+/* Estilo para el selector de categoría en el formulario de productos */
+.productos-module .formulario-producto select[name="categoria"] {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  background-color: #fff;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.productos-module .formulario-producto select[name="categoria"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
 .formulario-producto input[type="text"],

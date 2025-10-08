@@ -25,11 +25,9 @@ ChartJS.register(
   Filler,
   ArcElement
 );
-
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { color } from 'chart.js/helpers';
 
 const Dashboard = ({ user, onLogout, onSectionChange }) => {
   const [metrics, setMetrics] = useState({
@@ -65,9 +63,6 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
           fecha: doc.data().fecha?.toDate ? doc.data().fecha.toDate() : new Date()
         }));
 
-        console.log('Estados encontrados:', ventas.map(v => v.estado).filter(Boolean));
-        console.log('Estados únicos:', [...new Set(ventas.map(v => v.estado))]);
-
         const usuariosSnapshot = await getDocs(collection(db, 'Usuarios'));
         const usuariosMap = {};
         usuariosSnapshot.docs.forEach(doc => {
@@ -101,12 +96,12 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
           }
 
           const estadoVenta = venta.estado;
-            if (typeof estadoVenta === 'string') {
-              const estadoNormalizado = estadoVenta.trim().toLowerCase();
-              if (estadoNormalizado === 'pendiente') {
-                pedidosPendientes++;
-              }
+          if (typeof estadoVenta === 'string') {
+            const estadoNormalizado = estadoVenta.trim().toLowerCase();
+            if (estadoNormalizado === 'pendiente') {
+              pedidosPendientes++;
             }
+          }
 
           cajerosVentas[cajeroId].total += totalVenta;
           cajerosVentas[cajeroId].pedidos += 1;
@@ -180,13 +175,31 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
 
+  // === COLORES ADAPTADOS A OCEAN BREEZE ===
+  const primaryDark = '#03045e';
+  const primaryMedium = '#0077b6';
+  const primaryLight = '#00b4d8';
+  const secondary = '#90e0ef';
+  const info = '#00b4d8';
+  const light = '#e3f2fd';
+  const white = '#fff';
+
+  // Generar colores para el gráfico de dona (máximo 5 colores distintos)
+  const doughnutColors = [
+    primaryMedium,
+    primaryLight,
+    secondary,
+    info,
+    'var(--gray-500)'
+  ];
+
   const doughnutData = {
     labels: metrics.ventasPorCajero.map(c => c.nombre),
     datasets: [{
       data: metrics.ventasPorCajero.map(c => c.total),
-      backgroundColor: ['#D96704', '#400101', '#F2A81D', '#a60303', '#6c757d'],
+      backgroundColor: doughnutColors.slice(0, metrics.ventasPorCajero.length),
       borderWidth: 2,
-      borderColor: '#fff'
+      borderColor: white
     }]
   };
 
@@ -195,9 +208,9 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     datasets: [{
       label: 'Unidades vendidas',
       data: metrics.topProductos.map(p => (typeof p.vendidos === 'number' ? p.vendidos : 0)),
-      backgroundColor: '#D96704',
-      borderColor: '#400101',
-      borderWidth: 3,
+      backgroundColor: primaryMedium,
+      borderColor: primaryDark,
+      borderWidth: 2,
     }],
   };
 
@@ -206,8 +219,8 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     datasets: [{
       label: 'Ventas diarias ($)',
       data: metrics.ventas7Dias.data,
-      borderColor: '#D96704',
-      backgroundColor: 'rgba(217, 103, 4, 0.1)',
+      borderColor: primaryLight,
+      backgroundColor: `rgba(${parseInt(primaryLight.slice(1), 16) >> 16}, ${parseInt(primaryLight.slice(1), 16) >> 8 & 0xff}, ${parseInt(primaryLight.slice(1), 16) & 0xff}, 0.1)`,
       tension: 0.3,
       fill: true,
     }],
@@ -220,7 +233,10 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
       legend: { position: 'top' },
       tooltip: { mode: 'index', intersect: false },
     },
-    scales: { y: { beginAtZero: true } }
+    scales: { 
+      y: { beginAtZero: true },
+      x: { ticks: { autoSkip: false } }
+    }
   };
 
   return (
@@ -272,7 +288,13 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
             {loading ? (
               <p>Cargando...</p>
             ) : metrics.ventasPorCajero.length > 0 ? (
-              <Doughnut data={doughnutData} options={{ ...options, plugins: { legend: { position: 'bottom' } } }} />
+              <Doughnut 
+                data={doughnutData} 
+                options={{ 
+                  ...options, 
+                  plugins: { legend: { position: 'bottom' } } 
+                }} 
+              />
             ) : (
               <p>No hay ventas registradas.</p>
             )}

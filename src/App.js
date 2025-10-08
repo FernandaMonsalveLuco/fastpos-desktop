@@ -92,14 +92,13 @@ function App() {
     return <div className="loading">Cargando...</div>;
   }
 
-  // 🔁 Manejo de vistas fuera del dashboard
   if (showRegister) {
-    // Asegúrate de tener el componente Register importado si lo usas
-    return <Register onRegisterSuccess={() => setShowRegister(false)} />;
+    // Si usas Register, asegúrate de importarlo. Si no, elimina este bloque.
+    // return <Register onRegisterSuccess={() => setShowRegister(false)} />;
+    return <Login onLogin={handleLogin} />;
   }
 
   if (showForgotPassword) {
-    // ✅ Usa tu nuevo componente Recuperar
     return <Recuperar onBack={() => setShowForgotPassword(false)} />;
   }
 
@@ -137,7 +136,7 @@ function App() {
         <TomarPedido
           carritoActual={carrito}
           onAgregarAlCarrito={agregarAlCarrito}
-          onEliminarDelCarrito={eliminarDelCarrito} 
+          onEliminarDelCarrito={eliminarDelCarrito} // ✅ Pasamos la función
           onIrACaja={() => setActiveSection('caja')}
           onBack={() => setActiveSection('home')}
         />
