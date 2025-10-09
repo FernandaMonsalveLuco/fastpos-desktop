@@ -3,14 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 
-// ✅ Definimos las categorías disponibles
 const CATEGORIAS = [
   { value: 'platos', label: 'Platillos' },
   { value: 'bebida', label: 'Bebestibles' },
   { value: 'postre', label: 'Postres' },
   { value: 'acompañamiento', label: 'Acompañamientos' },
-  { value: 'combos', label: 'Combos' }
+  { value: 'combos', label: 'Combos' },
+  { value: 'otros', label: 'Otros'}
 ];
+
 
 const ProductosModule = ({ onBack }) => {
   const [productos, setProductos] = useState([]);
@@ -24,7 +25,10 @@ const ProductosModule = ({ onBack }) => {
     precio: '',
     descripcion: '',
     categoria: CATEGORIAS[0].value,
+    insumos: [], // [{ nombre: 'Masa pizza', cantidad: 1 }]
   });
+
+  const [nuevoInsumo, setNuevoInsumo] = useState({ nombre: '', cantidad: '' });
 
   useEffect(() => {
     const cargarProductos = async () => {
@@ -32,7 +36,8 @@ const ProductosModule = ({ onBack }) => {
         const querySnapshot = await getDocs(collection(db, 'Productos'));
         const productosList = querySnapshot.docs.map(doc => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
+          insumos: doc.data().insumos || [],
         }));
         setProductos(productosList);
       } catch (err) {
@@ -51,9 +56,35 @@ const ProductosModule = ({ onBack }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleInsumoChange = (field, value) => {
+    setNuevoInsumo(prev => ({ ...prev, [field]: value }));
+  };
+
+  const agregarInsumo = () => {
+    const { nombre, cantidad } = nuevoInsumo;
+    if (!nombre.trim() || !cantidad || isNaN(cantidad) || parseFloat(cantidad) <= 0) {
+      alert('Ingresa un nombre y una cantidad válida para el insumo.');
+      return;
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      insumos: [...prev.insumos, { nombre: nombre.trim(), cantidad: parseFloat(cantidad) }]
+    }));
+
+    setNuevoInsumo({ nombre: '', cantidad: '' });
+  };
+
+  const eliminarInsumo = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      insumos: prev.insumos.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { nombre, precio, descripcion, categoria } = formData;
+    const { nombre, precio, descripcion, categoria, insumos } = formData;
 
     if (!nombre || !precio || !categoria) {
       alert('Nombre, precio y categoría son obligatorios');
@@ -66,17 +97,15 @@ const ProductosModule = ({ onBack }) => {
         precio: parseFloat(precio),
         descripcion: descripcion || '',
         categoria,
+        insumos, // Guardamos los insumos
       };
 
       if (editando) {
-        // ✅ Actualizar en Firebase
         await updateDoc(doc(db, 'Productos', editando), datosProducto);
-        // ✅ Actualizar en el estado local (conservando otros campos)
         setProductos(prev =>
           prev.map(p => p.id === editando ? { ...p, ...datosProducto } : p)
         );
       } else {
-        // ✅ Crear nuevo producto
         const docRef = await addDoc(collection(db, 'Productos'), {
           ...datosProducto,
           createdAt: new Date(),
@@ -84,13 +113,14 @@ const ProductosModule = ({ onBack }) => {
         setProductos(prev => [...prev, { id: docRef.id, ...datosProducto, createdAt: new Date() }]);
       }
 
-      // Reset form
       setFormData({
         nombre: '',
         precio: '',
         descripcion: '',
-        categoria: CATEGORIAS[0].value
+        categoria: CATEGORIAS[0].value,
+        insumos: [],
       });
+      setNuevoInsumo({ nombre: '', cantidad: '' });
       setShowForm(false);
       setEditando(null);
     } catch (err) {
@@ -105,11 +135,12 @@ const ProductosModule = ({ onBack }) => {
       nombre: producto.nombre || '',
       precio: producto.precio ? producto.precio.toString() : '',
       descripcion: producto.descripcion || '',
-      // ✅ Aseguramos que la categoría sea válida
       categoria: CATEGORIAS.some(cat => cat.value === producto.categoria)
         ? producto.categoria
         : CATEGORIAS[0].value,
+      insumos: Array.isArray(producto.insumos) ? producto.insumos : [],
     });
+    setNuevoInsumo({ nombre: '', cantidad: '' });
     setShowForm(true);
   };
 
@@ -132,8 +163,10 @@ const ProductosModule = ({ onBack }) => {
       nombre: '',
       precio: '',
       descripcion: '',
-      categoria: CATEGORIAS[0].value
+      categoria: CATEGORIAS[0].value,
+      insumos: [],
     });
+    setNuevoInsumo({ nombre: '', cantidad: '' });
   };
 
   return (
@@ -151,7 +184,7 @@ const ProductosModule = ({ onBack }) => {
       {showForm && (
         <form className="formulario-producto" onSubmit={handleSubmit}>
           <h3>{editando ? 'Editar Producto' : 'Nuevo Producto'}</h3>
-          
+
           <input
             type="text"
             name="nombre"
@@ -160,7 +193,7 @@ const ProductosModule = ({ onBack }) => {
             onChange={handleChange}
             required
           />
-          
+
           <input
             type="number"
             name="precio"
@@ -171,8 +204,7 @@ const ProductosModule = ({ onBack }) => {
             min="0"
             required
           />
-          
-          {/* Selector de categoría */}
+
           <select
             name="categoria"
             value={formData.categoria}
@@ -185,14 +217,57 @@ const ProductosModule = ({ onBack }) => {
               </option>
             ))}
           </select>
-          
+
           <textarea
             name="descripcion"
             placeholder="Descripción (opcional)"
             value={formData.descripcion}
             onChange={handleChange}
           />
-          
+
+          {/* Sección de Insumos */}
+          <div className="insumos-section">
+            <h4>Insumos requeridos (por unidad vendida)</h4>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+              <input
+                type="text"
+                placeholder="Nombre del insumo (ej. Masa pizza)"
+                value={nuevoInsumo.nombre}
+                onChange={(e) => handleInsumoChange('nombre', e.target.value)}
+                style={{ flex: 2 }}
+              />
+              <input
+                type="number"
+                placeholder="Cantidad"
+                value={nuevoInsumo.cantidad}
+                onChange={(e) => handleInsumoChange('cantidad', e.target.value)}
+                min="0.01"
+                step="0.01"
+                style={{ flex: 1 }}
+              />
+              <button type="button" onClick={agregarInsumo} style={{ padding: '6px 10px' }}>
+                +
+              </button>
+            </div>
+
+            {formData.insumos.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0, maxHeight: '150px', overflowY: 'auto' }}>
+                {formData.insumos.map((insumo, index) => (
+                  <li key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                    <span>{insumo.nombre} × {insumo.cantidad}</span>
+                    <button
+                      type="button"
+                      onClick={() => eliminarInsumo(index)}
+                      style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      ✕
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           <div className="form-buttons">
             <button type="submit" className="btn-guardar">
               {editando ? 'Actualizar' : 'Guardar'}
@@ -219,7 +294,7 @@ const ProductosModule = ({ onBack }) => {
                   <th>Nombre</th>
                   <th>Precio</th>
                   <th>Categoría</th>
-                  <th>Descripción</th>
+                  <th>Insumos</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -231,7 +306,11 @@ const ProductosModule = ({ onBack }) => {
                     <td>
                       {CATEGORIAS.find(c => c.value === producto.categoria)?.label || producto.categoria || '—'}
                     </td>
-                    <td>{producto.descripcion || '—'}</td>
+                    <td>
+                      {producto.insumos && producto.insumos.length > 0
+                        ? producto.insumos.map(i => `${i.nombre}×${i.cantidad}`).join(', ')
+                        : '—'}
+                    </td>
                     <td>
                       <button className="btn-editar" onClick={() => handleEditar(producto)}>
                         Editar

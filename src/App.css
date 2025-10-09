@@ -1,68 +1,76 @@
-/* === PALETA DE COLORES — OCEAN BREEZE === */
+/* === PALETA DE COLORES — OCEAN BREEZE (Alto Contraste) === */
 :root {
-  --primary-dark: #023047;        /* Azul marino profundo (texto, fondo oscuro) */
-  --primary-medium: #219EBC;      /* Turquesa vibrante (botones primarios, énfasis) */
-  --primary-light: #8ECAE6;       /* Azul claro suave (fondos, hover, elementos secundarios) */
-  --secondary: #8ECAE6;           /* Mismo que primary-light, para consistencia */
-  --danger: #FB8500;              /* Naranja cálido (alertas, eliminar, cancelar) */
-  --warning: #FFB703;             /* Amarillo dorado (advertencias, destacados) */
-  --info: #219EBC;                /* Turquesa (información, estado activo) */
-  --success: #00c853;             /* Verde vibrante (éxito — lo mantenemos como está) */
-  --light: #f0f8ff;               /* Fondo muy claro con tono azulado (alternativo al blanco) */
-  --dark: #023047;                /* Mismo que primary-dark para textos y bordes oscuros */
-  --gray-100: #1b263b;       /* Fondo de tarjetas / secciones */
-  --gray-200: #222f45;
-  --gray-300: #2a3b55;
-  --gray-400: #3b506e;
-  --gray-500: #5a7398;
-  --gray-600: #8a9eb1;
-  --gray-700: #b0c4d6;
-  --gray-800: #d0e0f0;
-  --gray-900: #e0f7fa;
+  /* Fondo y texto principales */
+  --light: #f0f9ff;           /* Fondo muy claro, tono azul suave (mejor que #f0f8ff) */
+  --dark: #023047;            /* Azul marino profundo — excelente para texto */
+
+  /* Primarios */
+  --primary-dark: #023047;    /* Texto / fondo oscuro */
+  --primary-medium: #0288d1;  /* Turquesa más saturado y oscuro → mejor contraste */
+  --primary-light: #b3e5fc;   /* Azul claro más brillante → mejor contraste sobre blanco */
+
+  /* Secundarios y estados */
+  --secondary: #ff9800;       /* Naranja más saturado → destaca mejor */
+  --danger: #d32f2f;          /* Rojo accesible (no naranja) → alto contraste */
+  --warning: #f57c00;         /* Naranja-ámbar más oscuro → legible */
+  --info: #0288d1;            /* Igual que primary-medium */
+  --success: #2e7d32;         /* Verde oscuro → mucho mejor contraste que #00c853 */
+
+  /* Escala de grises (modo claro) */
+  --gray-100: #e3f2fd;        /* Fondo de tarjetas */
+  --gray-200: #bbdefb;
+  --gray-300: #90caf9;
+  --gray-400: #64b5f6;
+  --gray-500: #42a5f5;
+  --gray-600: #2196f3;
+  --gray-700: #1e88e5;
+  --gray-800: #1976d2;
+  --gray-900: #0d47a1;
+
   --white: #ffffff;
   --black: #000000;
-  --border-color: #b3d4fc;        /* Borde azul claro, suave */
-  --shadow: 0 4px 12px rgba(2, 48, 71, 0.15); /* Sombra en tono azul marino */
+  --border-color: #90caf9;
+  --shadow: 0 4px 12px rgba(2, 48, 71, 0.15);
   --transition: all 0.2s ease;
 }
 
-/* === MODO OSCURO === */
+/* === MODO OSCURO (Alto Contraste) === */
 [data-theme="dark"] {
-  /* Fondo principal oscuro con ligero tono azulado (no negro puro) */
-  --light: #0d1b2a;          /* Azul muy oscuro (fondo general) */
-  --dark: #e0f7fa;           /* Texto claro suave (casi blanco, pero más cálido) */
+  /* Fondo y texto principales */
+  --light: #0a1929;           /* Azul muy oscuro, pero no negro → reduce fatiga visual */
+  --dark: #e3f2fd;            /* Texto claro brillante, pero no blanco puro */
 
-  /* Colores primarios adaptados al modo oscuro */
-  --primary-dark: #8ECAE6;   /* Mantenemos el azul marino como acento oscuro */
-  --primary-medium: #219EBC; /* Turquesa vibrante (igual que en modo claro, funciona bien) */
-  --primary-light: #023047;  /* Azul claro (igual, se ve bien sobre fondo oscuro) */
+  /* Primarios */
+  --primary-dark: #e3f2fd;    /* Texto claro en elementos oscuros */
+  --primary-medium: #4fc3f7;  /* Turquesa brillante → destaca sobre oscuro */
+  --primary-light: #023047;   /* Azul marino como fondo de acento */
 
   /* Secundarios y estados */
-  --secondary: #FFB703;      /* Usamos el amarillo dorado como secundario (destaca más en oscuro) */
-  --warning: #FFB703;        /* Advertencias: amarillo dorado */
-  --danger: #FB8500;         /* Naranja cálido (mantiene contraste y coherencia) */
-  --info: #219EBC;           /* Turquesa para info */
-  --success: #66bb6a;        /* Verde suave (legible en oscuro) */
+  --secondary: #ffd54f;       /* Amarillo dorado brillante → excelente en oscuro */
+  --danger: #ff6b6b;          /* Rojo coral brillante → visible y accesible */
+  --warning: #ffd54f;         /* Amarillo dorado → alto contraste en oscuro */
+  --info: #4fc3f7;            /* Turquesa brillante */
+  --success: #69f0ae;         /* Verde neón suave → legible en oscuro */
 
-  /* Escala de grises adaptada */
-  --gray-900: #1b263b;       /* Fondo de tarjetas / secciones */
-  --gray-800: #222f45;
-  --gray-700: #2a3b55;
-  --gray-600: #3b506e;
-  --gray-500: #5a7398;
-  --gray-400: #8a9eb1;
-  --gray-300: #b0c4d6;
-  --gray-200: #d0e0f0;
-  --gray-100: #e0f7fa;
+  /* Escala de grises (modo oscuro): invertida y ajustada */
+  --gray-900: #0f263e;        /* Fondo de tarjetas */
+  --gray-800: #15324d;
+  --gray-700: #1b3e5d;
+  --gray-600: #2c5a80;
+  --gray-500: #4a7ca5;
+  --gray-400: #6ea8d1;
+  --gray-300: #99c5e5;
+  --gray-200: #c1e0f4;
+  --gray-100: #e3f2fd;
 
-  /* Invertimos blanco/negro */
-  --white: #0d1b2a;          /* Fondo oscuro */
-  --black: #e0f7fa;          /* Texto claro */
+  --white: #0a1929;           /* Fondo oscuro */
+  --black: #e3f2fd;           /* Texto claro */
 
-  /* Borde y sombra */
-  --border-color: #3b506e;   /* Gris azulado suave */
-  --shadow: 0 4px 12px rgba(2, 48, 71, 0.4); /* Sombra profunda pero no agresiva */
+  --border-color: #4a7ca5;    /* Borde gris-azul con buen contraste */
+  --shadow: 0 4px 12px rgba(0, 30, 60, 0.4);
 }
+
+
 /* === RESET Y FUENTES === */
 * {
   margin: 0;
@@ -72,7 +80,7 @@
 
 body {
   background-color: var(--light);
-  color: var(--dark);
+  color: var(--text-on-light);
   line-height: 1.6;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -89,24 +97,28 @@ body {
   padding: 40px;
   background: var(--white);
   transition: background 0.3s ease;
+  box-shadow: var(--shadow);
 }
-.login-container{
+
+.login-container {
   min-height: auto;
+  background: var(--white);
+  box-shadow: var(--shadow);
 }
 
 /* === DASHBOARD - NAVEGACIÓN === */
 .dashboard-navbar {
   display: flex;
-  border-radius: 20px;
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
   background: var(--primary-dark);
-  color: var(--white);
+  color: var(--text-on-dark);
   box-shadow: var(--shadow);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-radius: 20px;
   transition: background 0.3s ease;
 }
 
@@ -116,6 +128,7 @@ body {
   gap: 10px;
   font-size: 22px;
   font-weight: bold;
+  color: var(--white);
 }
 
 .logo-icon {
@@ -138,12 +151,12 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
 }
 
 .nav-action-btn:hover {
   background: var(--white);
-  color: var(--dark);
+  color: var(--primary-dark);
 }
 
 .navbar-user {
@@ -151,6 +164,7 @@ body {
   align-items: center;
   gap: 16px;
   font-size: 15px;
+  color: var(--white);
 }
 
 .btn-logout {
@@ -186,7 +200,7 @@ body {
 .metric-card {
   background: var(--primary-light);
   border-radius: 12px;
-  color: var(--white);
+  color: var(--text-on-dark);
   padding: 20px;
   text-align: center;
   box-shadow: var(--shadow);
@@ -196,6 +210,7 @@ body {
 .metric-card1 {
   background: var(--primary-medium);
   border-radius: 12px;
+  color: var(--text-on-dark);
   padding: 20px;
   text-align: center;
   box-shadow: var(--shadow);
@@ -205,6 +220,7 @@ body {
 .metric-card2 {
   background: var(--danger);
   border-radius: 12px;
+  color: var(--text-on-dark);
   padding: 20px;
   text-align: center;
   box-shadow: var(--shadow);
@@ -214,6 +230,7 @@ body {
 .metric-card3 {
   background: var(--primary-dark);
   border-radius: 12px;
+  color: var(--text-on-dark);
   padding: 20px;
   text-align: center;
   box-shadow: var(--shadow);
@@ -230,7 +247,7 @@ body {
 
 .metric-label {
   font-size: 14px;
-  color: var(--white);
+  color: var(--text-on-dark);
   letter-spacing: 1px;
   margin-bottom: 8px;
 }
@@ -238,7 +255,7 @@ body {
 .metric-value {
   font-size: 24px;
   font-weight: bold;
-  color: var(--gray-200);
+  color: var(--white); /* Alto contraste sobre fondo colorido */
 }
 
 .section-title {
@@ -264,13 +281,14 @@ body {
 }
 
 .chart-card {
-  background: var(--light);
+  background: var(--white);
   border-radius: 16px;
   padding: 16px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   transition: background 0.3s ease, box-shadow 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .chart-card h3 {
@@ -279,6 +297,8 @@ body {
   margin-bottom: 12px;
   text-align: center;
   transition: color 0.3s ease;
+  border-bottom: 2px solid var(--primary-light);
+  padding-bottom: 0.5rem;
 }
 
 /* Bento-style: make first chart (doughnut) span 2 rows */
@@ -324,6 +344,8 @@ body {
   box-shadow: var(--shadow);
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  border: 2px solid transparent;
 }
 
 .dashboard-card:hover {
@@ -335,6 +357,7 @@ body {
 .card-icon {
   font-size: 40px;
   margin-bottom: 12px;
+  color: var(--primary-medium);
 }
 
 .card-title {
@@ -353,6 +376,7 @@ body {
   border-radius: 16px;
   box-shadow: var(--shadow);
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .login-container h2 {
@@ -384,12 +408,14 @@ body {
   border-radius: 12px;
   font-size: 16px;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .form-group input:focus {
   outline: none;
   border-color: var(--primary-medium);
-  box-shadow: 0 4px 12px rgba(224, 168, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background: var(--gray-100);
 }
 
@@ -412,7 +438,7 @@ body {
 }
 
 .btn-ingresar:disabled {
-  background: var(--primary-light);
+  background: var(--gray-400);
   cursor: not-allowed;
 }
 
@@ -428,6 +454,7 @@ body {
 
 .register-link:hover {
   text-decoration: underline;
+  color: var(--primary-dark);
 }
 
 /* === BOTONES GLOBALES === */
@@ -438,8 +465,7 @@ body {
   margin-right: 3px;
   padding: 14px;
   border-radius: 12px;
-  border: 2px solid;
-  border-color: var(--primary-dark);
+  border: 2px solid var(--primary-dark);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
@@ -460,13 +486,19 @@ body {
   margin-right: 3px;
   padding: 14px;
   border-radius: 12px;
-  border: 2px solid;
-  border-color: var(--danger);
+  border: 2px solid var(--danger);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   width: 190px;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-cancelar:hover,
+.btn-eliminar:hover {
+  background-color: var(--white);
+  color: var(--danger);
+  border: 2px solid var(--danger);
 }
 
 .btn-editar,
@@ -478,20 +510,12 @@ body {
   margin-right: 3px;
   padding: 14px;
   border-radius: 12px;
-  border: 2px solid;
-  border-color: var(--primary-medium);
+  border: 2px solid var(--primary-medium);
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   width: 190px;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
-}
-
-.btn-cancelar:hover,
-.btn-eliminar:hover {
-  background-color: var(--white);
-  color: var(--primary-dark);
-  border: 2px solid var(--primary-dark);
 }
 
 .btn-editar:hover,
@@ -521,6 +545,7 @@ body {
   flex-direction: column;
   gap: 20px;
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .pedido-header {
@@ -558,6 +583,7 @@ body {
   box-shadow: var(--shadow);
   background-color: var(--white);
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .productos-grid {
@@ -595,6 +621,7 @@ body {
   display: flex;
   flex-direction: column;
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .orden-panel h3 {
@@ -630,6 +657,7 @@ body {
   background: var(--gray-100);
   border-radius: 6px;
   transition: background 0.2s;
+  color: var(--text-on-light);
 }
 
 .orden-item:hover {
@@ -662,6 +690,7 @@ body {
   border-radius: 12px;
   box-shadow: var(--shadow);
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .categoria-btn {
@@ -698,6 +727,7 @@ body {
   box-shadow: var(--shadow);
   background-color: var(--white);
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .usuarios-module h2 {
@@ -716,6 +746,7 @@ body {
   border-radius: 8px;
   margin-bottom: 20px;
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .formulario-usuario input,
@@ -726,6 +757,8 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 4px;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .formulario-usuario input:focus,
@@ -755,6 +788,7 @@ body {
   border-bottom: 1px solid var(--border-color);
   font-weight: 500;
   transition: color 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .lista-usuarios th {
@@ -773,6 +807,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: var(--text-on-light);
 }
 
 .form-actions {
@@ -792,6 +827,7 @@ body {
   text-align: left;
   border-bottom: 1px solid var(--border-color);
   transition: color 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .status-badge {
@@ -799,22 +835,25 @@ body {
   border-radius: 12px;
   font-size: 0.85em;
   font-weight: bold;
+  color: white;
 }
 
 .status-badge.activo {
   background-color: var(--success);
-  color: white;
 }
 
 .status-badge.inactivo {
   background-color: var(--danger);
-  color: white;
 }
 
 .btn-small {
   padding: 4px 8px;
   font-size: 0.85em;
   margin-right: 6px;
+  background: var(--gray-400);
+  color: var(--text-on-light);
+  border: none;
+  border-radius: 4px;
 }
 
 /* === MENSAJES === */
@@ -851,6 +890,7 @@ body {
   padding: 20px;
   max-width: 600px;
   margin: 0 auto;
+  color: var(--text-on-light);
 }
 
 .configuracion-module h2 {
@@ -864,6 +904,7 @@ body {
   padding: 24px;
   border-radius: 12px;
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .formulario-config .form-group {
@@ -887,6 +928,8 @@ body {
   border-radius: 6px;
   font-size: 16px;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .formulario-config input[type="text"]:focus,
@@ -902,6 +945,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--text-on-light);
 }
 
 .btn-guardar {
@@ -963,10 +1007,12 @@ body {
   color: #666;
   margin-left: 8px;
 }
+
 .pedidos-module {
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
+  color: var(--text-on-light);
 }
 
 .pedidos-module h2 {
@@ -1000,6 +1046,7 @@ body {
   background: var(--white);
   min-width: 150px;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .filtros-pedidos select:focus {
@@ -1016,6 +1063,7 @@ body {
   box-shadow: var(--shadow);
   border-left: 4px solid var(--primary-medium);
   transition: background 0.3s ease, box-shadow 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .pedido-item:hover {
@@ -1045,8 +1093,7 @@ body {
 
 .btn-eliminar-item {
   background: var(--danger);
-  border: 0.5px solid;
-  border-color: var(--danger);
+  border: 0.5px solid var(--danger);
   border-radius: 50%;
   color: var(--white);
   width: 24px;
@@ -1081,11 +1128,11 @@ body {
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
+  color: white;
 }
 
 .estado-badge.completada {
   background-color: var(--success);
-  color: white;
 }
 
 .estado-badge.pendiente {
@@ -1095,13 +1142,13 @@ body {
 
 .estado-badge.cancelada {
   background-color: var(--danger);
-  color: white;
 }
 
 .pedido-detalles p {
   margin: 6px 0;
   font-size: 15px;
   transition: color 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .pedido-detalles strong {
@@ -1121,6 +1168,7 @@ body {
   border-bottom: 1px solid var(--border-color);
   font-weight: 500;
   transition: color 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .productos-lista th {
@@ -1139,6 +1187,7 @@ body {
   box-shadow: var(--shadow);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .recuperar-container h2 {
@@ -1153,7 +1202,7 @@ body {
 .recuperar-container .btn-volver {
   background: none;
   border: none;
-  color: var(--primary-light);
+  color: var(--primary-medium);
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -1166,7 +1215,7 @@ body {
 
 .recuperar-container .btn-volver:hover {
   text-decoration: underline;
-  color: var(--primary-medium);
+  color: var(--primary-dark);
 }
 
 .recuperar-container .form-group {
@@ -1189,19 +1238,21 @@ body {
   font-size: 16px;
   box-sizing: border-box;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .recuperar-container .form-group input[type="email"]:focus {
   outline: none;
   border-color: var(--primary-medium);
-  box-shadow: 0 0 0 3px rgba(224, 168, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
   background: var(--gray-100);
 }
 
 .recuperar-container .btn-enviar {
   width: 100%;
   padding: 12px;
-  background-color: var(--primary-light);
+  background-color: var(--primary-medium);
   color: var(--white);
   border: none;
   border-radius: 6px;
@@ -1262,19 +1313,20 @@ body {
 }
 
 .tipo-pago-contenido {
-  background: white;
+  background: var(--white);
   padding: 28px;
   border-radius: 16px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   position: relative;
+  color: var(--text-on-light);
 }
 
 .tipo-pago-contenido h3 {
   margin-top: 0;
-  color: #400101;
+  color: var(--primary-dark);
   text-align: center;
   font-size: 22px;
   font-weight: 700;
@@ -1285,10 +1337,10 @@ body {
   text-align: center;
   font-size: 20px;
   font-weight: 700;
-  color: #D96704;
+  color: var(--primary-medium);
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--gray-200);
 }
 
 .form-group {
@@ -1304,7 +1356,7 @@ body {
   gap: 12px;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  color: var(--primary-dark);
   cursor: pointer;
   width: 100%;
 }
@@ -1312,19 +1364,19 @@ body {
 .form-group input[type="radio"] {
   width: 20px;
   height: 20px;
-  accent-color: #D96704; /* Color del círculo seleccionado */
+  accent-color: var(--primary-medium);
 }
 
 .efectivo-input {
   margin-top: 20px;
   padding-top: 16px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--gray-300);
 }
 
 .efectivo-input label {
   display: block;
   font-weight: 600;
-  color: #400101;
+  color: var(--primary-dark);
   margin-bottom: 8px;
   font-size: 15px;
 }
@@ -1332,16 +1384,19 @@ body {
 .efectivo-input input[type="number"] {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 0.2s;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .efectivo-input input[type="number"]:focus {
   outline: none;
-  border-color: #D96704;
-  box-shadow: 0 0 0 3px rgba(217, 103, 4, 0.2);
+  border-color: var(--primary-medium);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  background: var(--gray-100);
 }
 
 .form-buttons {
@@ -1350,12 +1405,12 @@ body {
   justify-content: center;
   margin-top: 24px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--gray-300);
 }
 
 .btn-pagar {
-  background-color: #28a745;
-  color: white;
+  background-color: var(--success);
+  color: var(--white);
   border: none;
   padding: 12px 28px;
   border-radius: 8px;
@@ -1368,13 +1423,13 @@ body {
 }
 
 .btn-pagar:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: var(--success);
   transform: translateY(-2px);
 }
 
 .btn-cancelar {
-  background-color: #6c757d;
-  color: white;
+  background-color: var(--gray-600);
+  color: var(--white);
   border: none;
   padding: 12px 28px;
   border-radius: 8px;
@@ -1387,7 +1442,7 @@ body {
 }
 
 .btn-cancelar:hover {
-  background-color: #5a6268;
+  background-color: var(--gray-700);
 }
 
 /* Responsive */
@@ -1415,6 +1470,7 @@ body {
   box-shadow: var(--shadow);
   margin-bottom: 24px;
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .formulario-producto h3 {
@@ -1431,18 +1487,19 @@ body {
   width: 100%;
   padding: 10px;
   margin: 8px 0;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 16px;
-  background-color: #fff;
-  color: #333;
+  background-color: var(--white);
+  color: var(--text-on-light);
   box-sizing: border-box;
 }
 
 .productos-module .formulario-producto select[name="categoria"]:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-color: var(--primary-medium);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  background: var(--white);
 }
 
 .formulario-producto input[type="text"],
@@ -1456,6 +1513,8 @@ body {
   font-size: 16px;
   box-sizing: border-box;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .formulario-producto input[type="text"]:focus,
@@ -1463,8 +1522,8 @@ body {
 .formulario-producto textarea:focus {
   outline: none;
   border-color: var(--primary-medium);
-  box-shadow: 0 0 0 3px rgba(224, 168, 0, 0.2);
-  background: var(--white);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  background: var(--gray-100);
 }
 
 .formulario-producto textarea {
@@ -1490,7 +1549,7 @@ body {
 }
 
 .btn-guardar {
-  background-color: var(--primary-light);
+  background-color: var(--primary-medium);
   color: var(--white);
 }
 
@@ -1614,6 +1673,7 @@ body {
   max-width: 500px;
   box-shadow: var(--shadow);
   transition: background 0.3s ease;
+  color: var(--text-on-light);
 }
 
 .tipo-pago-contenido h3 {
@@ -1664,12 +1724,14 @@ body {
   border-radius: 6px;
   font-size: 16px;
   transition: border-color 0.2s, background 0.3s ease;
+  color: var(--text-on-light);
+  background: var(--white);
 }
 
 .efectivo-input input:focus {
   outline: none;
   border-color: var(--primary-medium);
-  box-shadow: 0 0 0 3px rgba(224, 168, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
   background: var(--gray-100);
 }
 
