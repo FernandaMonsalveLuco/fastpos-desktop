@@ -7,7 +7,9 @@ import {
   where,
   orderBy,
   updateDoc,
-  doc
+  doc,
+  getDoc,
+  writeBatch
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -16,7 +18,7 @@ const Pedidos = ({ onBack }) => {
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [error, setError] = useState(null);
-  const [actualizando, setActualizando] = useState(new Set()); // Para evitar múltiples clics
+  const [actualizando, setActualizando] = useState(new Set());
 
   useEffect(() => {
     const cargarPedidos = async () => {
@@ -24,7 +26,6 @@ const Pedidos = ({ onBack }) => {
       setError(null);
       try {
         let q;
-
         if (filtroEstado === 'todos') {
           q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'));
         } else {
@@ -44,11 +45,10 @@ const Pedidos = ({ onBack }) => {
             fecha: data.fecha?.toDate ? data.fecha.toDate() : null
           };
         });
-
         setPedidos(lista);
       } catch (err) {
         console.error('Error al cargar pedidos:', err);
-        setError('No se pudieron cargar los pedidos. Revisa la consola para más detalles.');
+        setError('No se pudieron cargar los pedidos.');
       } finally {
         setLoading(false);
       }
@@ -57,25 +57,58 @@ const Pedidos = ({ onBack }) => {
     cargarPedidos();
   }, [filtroEstado]);
 
-  // ✅ Función para actualizar el estado de un pedido
-  const actualizarEstado = async (pedidoId, nuevoEstado) => {
-    if (actualizando.has(pedidoId)) return; // Evitar múltiples envíos
+  // ✅ Función para revertir inventario al cancelar pedido
+  const revertirInventario = async (productos) => {
+    const batch = writeBatch(db);
 
+    for (const prod of productos) {
+      if (!prod.productId || !prod.cantidad) continue;
+
+      const inventoryRef = doc(db, 'inventario', prod.productId); // ← Colección "inventario"
+      const inventorySnap = await getDoc(inventoryRef);
+
+      if (inventorySnap.exists()) {
+        const currentStock = inventorySnap.data().stock || 0; // ← Campo "stock", no "currentStock"
+        batch.update(inventoryRef, {
+          stock: currentStock + prod.cantidad, // ← Incrementa el stock
+          lastUpdated: new Date()
+        });
+      }
+    }
+
+    await batch.commit();
+  };
+
+  // ✅ Función actualizada para manejar cancelación + reversión
+  const actualizarEstado = async (pedidoId, nuevoEstado) => {
+    if (actualizando.has(pedidoId)) return;
     setActualizando(prev => new Set(prev).add(pedidoId));
 
     try {
-      const pedidoRef = doc(db, 'ventas', pedidoId);
+      const pedidoActual = pedidos.find(p => p.id === pedidoId);
+      if (!pedidoActual) throw new Error('Pedido no encontrado');
+
+      const estadoAnterior = pedidoActual.estado;
+
+      // Si se cancela un pedido pendiente → revertir inventario
+      if (nuevoEstado === 'cancelada' && estadoAnterior === 'pendiente') {
+        await revertirInventario(pedidoActual.productos || []);
+      }
+
+      // Actualizar estado del pedido
+      const pedidoRef = doc(db, 'ventas', pedidoId); // ← Colección "ventas"
       await updateDoc(pedidoRef, { estado: nuevoEstado });
 
-      // Actualizar estado local inmediatamente (optimistic update)
+      // Optimistic update
       setPedidos(prev =>
         prev.map(p =>
           p.id === pedidoId ? { ...p, estado: nuevoEstado } : p
         )
       );
+
     } catch (err) {
-      console.error('Error al actualizar el estado del pedido:', err);
-      setError('No se pudo actualizar el estado del pedido. Inténtalo de nuevo.');
+      console.error('Error al actualizar el pedido o inventario:', err);
+      setError('No se pudo procesar la actualización. Revisa la consola.');
     } finally {
       setActualizando(prev => {
         const newSet = new Set(prev);
@@ -106,7 +139,6 @@ const Pedidos = ({ onBack }) => {
     }
   };
 
-  // Estados permitidos (según tus opciones)
   const estadosPermitidos = ['pendiente', 'completada', 'cancelada'];
 
   return (
@@ -158,7 +190,6 @@ const Pedidos = ({ onBack }) => {
                   ))}
                 </ul>
 
-                {/* ✅ Selector para cambiar estado */}
                 <div className="acciones-pedido">
                   <label>Actualizar estado:</label>
                   <select
