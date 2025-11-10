@@ -1,80 +1,23 @@
 // src/renderer/components/TomarPedido.js
-import React, { useState, useEffect } from 'react';
-import {
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  updateDoc,
-  addDoc
-} from 'firebase/firestore';
-import { db } from '../firebase';
-import PedidoActivo from './pedidoActivo';
-
-const CATEGORIAS = [
-  { value: 'platos', label: 'Platillos' },
-  { value: 'bebida', label: 'Bebestibles' },
-  { value: 'postre', label: 'Postres' },
-  { value: 'acompañamiento', label: 'Acompañamientos' },
-  { value: 'combos', label: 'Combos' },
-  { value: 'otros', label: 'Otros' }
-];
-
-// ======================
-// Componente: SeleccionarMesa
-// ======================
-const SeleccionarMesa = ({ mesas, onSelect }) => {
-  return (
-    <div className="seleccionar-mesa">
-      <h2>Selecciona una mesa</h2>
-      <div className="mesas-grid">
-        {mesas.map(mesa => (
-          <button
-            key={mesa.id}
-            className={`mesa-btn ${mesa.estado === 'ocupada' ? 'ocupada' : ''}`}
-            onClick={() => onSelect(mesa)}
-            disabled={mesa.estado === 'ocupada'}
-          >
-            Mesa {mesa.numero}
-            {mesa.estado === 'ocupada' && ' (ocupada)'}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ======================
-// Componente principal: TomarPedido
-// ======================
-const TomarPedido = ({ onBack }) => {
-  const [mesas, setMesas] = useState([]);
-  const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
+const TomarPedido = ({ 
+  carritoActual = [], 
+  onAgregarAlCarrito, 
+  onEliminarDelCarrito, // ✅ Recibimos la función del padre
+  onIrACaja, 
+  onBack 
+}) => {
   const [productos, setProductos] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState(CATEGORIAS[0].value);
   const [loading, setLoading] = useState(true);
   const [ivaPorcentaje, setIvaPorcentaje] = useState(19);
   const [carritoLocal, setCarritoLocal] = useState([]);
 
-  // === Cargar mesas ===
+  // Sincronizar carrito local con el carrito del padre
   useEffect(() => {
-    const cargarMesas = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'mesas'));
-        const listaMesas = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setMesas(listaMesas);
-      } catch (error) {
-        console.error('Error al cargar mesas:', error);
-        alert('No se pudieron cargar las mesas.');
-      }
-    };
-    cargarMesas();
-  }, []);
+    setCarritoLocal(carritoActual);
+  }, [carritoActual]);
 
-  // === Cargar configuración (IVA) ===
+  // Cargar configuración (IVA)
   useEffect(() => {
     const cargarConfiguracion = async () => {
       try {
@@ -90,7 +33,7 @@ const TomarPedido = ({ onBack }) => {
     cargarConfiguracion();
   }, []);
 
-  // === Cargar productos ===
+  // Cargar productos
   useEffect(() => {
     const fetchProductos = async () => {
       try {
@@ -101,7 +44,7 @@ const TomarPedido = ({ onBack }) => {
         }));
         setProductos(lista);
 
-        const primeraValida = CATEGORIAS.find(cat =>
+        const primeraValida = CATEGORIAS.find(cat => 
           lista.some(p => p.categoria === cat.value)
         );
         if (primeraValida) {
@@ -109,7 +52,6 @@ const TomarPedido = ({ onBack }) => {
         }
       } catch (error) {
         console.error('Error al cargar productos:', error);
-        alert('No se pudieron cargar los productos.');
       } finally {
         setLoading(false);
       }
@@ -117,161 +59,122 @@ const TomarPedido = ({ onBack }) => {
     fetchProductos();
   }, []);
 
-  // === Seleccionar mesa ===
-  const seleccionarMesa = async (mesa) => {
-    if (mesa.estado !== 'libre') {
-      alert('Esta mesa ya está ocupada');
-      return;
-    }
-    try {
-      const mesaRef = doc(db, 'mesas', mesa.id);
-      await updateDoc(mesaRef, { estado: 'ocupada' });
-
-      const mesaActualizada = { ...mesa, estado: 'ocupada' };
-      setMesaSeleccionada(mesaActualizada);
-      setMesas(prev => prev.map(m => (m.id === mesa.id ? mesaActualizada : m)));
-      setCarritoLocal([]);
-    } catch (error) {
-      console.error('Error al marcar mesa como ocupada:', error);
-      alert('No se pudo abrir la mesa. Inténtalo de nuevo.');
-    }
-  };
-
-  // === Carrito ===
   const agregarProducto = (producto) => {
     const nuevoItem = { ...producto, cantidad: 1 };
     setCarritoLocal(prev => [...prev, nuevoItem]);
+    onAgregarAlCarrito([nuevoItem]);
   };
 
+  // ✅ Corregido: ahora notifica al padre
   const eliminarProducto = (id) => {
     setCarritoLocal(prev => prev.filter(item => item.id !== id));
+    onEliminarDelCarrito(id); // ← Esto actualiza el carrito en App.js
   };
 
-  // === Cálculos de totales ===
-  const subtotal = carritoLocal.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0);
-  const iva = Math.round(subtotal * (ivaPorcentaje / 100));
+  // Cálculos de totales
+  const subtotal = useMemo(() =>
+    carritoLocal.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0),
+    [carritoLocal]
+  );
+  const iva = useMemo(() => Math.round(subtotal * (ivaPorcentaje / 100)), [subtotal, ivaPorcentaje]);
   const total = subtotal + iva;
 
-  // === Enviar pedido con validaciones ===
-  const handleEnviarPedido = async () => {
-    // 🔴 Validación: mesa seleccionada
-    if (!mesaSeleccionada) {
-      alert('Por favor, selecciona una mesa antes de enviar el pedido.');
-      return;
-    }
-
-    // 🔴 Validación: pedido no vacío
+  const handleIrACaja = () => {
     if (carritoLocal.length === 0) {
       alert('Agrega al menos un producto al pedido.');
       return;
     }
-
-    // 🟡 Confirmación opcional
-    if (!window.confirm(`¿Enviar pedido de la Mesa ${mesaSeleccionada.numero} a cocina?\nTotal: $${total.toLocaleString()}`)) {
-      return;
-    }
-
-    try {
-      const nuevoPedido = {
-        mesaId: mesaSeleccionada.id,
-        mesaNumero: mesaSeleccionada.numero,
-        items: carritoLocal,
-        subtotal,
-        iva,
-        total,
-        estado: 'en_cocina',
-        pagado: false,
-        timestamp: new Date()
-      };
-
-      await addDoc(collection(db, 'pedidos'), nuevoPedido);
-      setCarritoLocal([]);
-      alert('✅ ¡Pedido enviado a cocina!');
-    } catch (error) {
-      console.error('Error al enviar pedido:', error);
-      alert('No se pudo enviar el pedido. Verifica tu conexión.');
-    }
+    onIrACaja();
   };
 
-  // === Filtros ===
-  const productosFiltrados = productos
-    .filter(p => p.categoria === categoriaActiva)
-    .filter(p => p.activo !== false);
-
+  const productosFiltrados = productos.filter(p => p.categoria === categoriaActiva);
   const categoriasDisponibles = CATEGORIAS.filter(cat =>
     productos.some(p => p.categoria === cat.value)
   );
 
-  // === Renderizado ===
-  if (!mesaSeleccionada) {
-    return (
-      <div className="tomar-pedido-container">
-        <div className="pedido-header">
-          <button className="btn-volver" onClick={onBack}>← Volver</button>
-          <h2>Tomar Pedido</h2>
-        </div>
-        <SeleccionarMesa mesas={mesas} onSelect={seleccionarMesa} />
-      </div>
-    );
-  }
-
   return (
     <div className="tomar-pedido-container">
       <div className="pedido-header">
-        <button className="btn-volver" onClick={() => setMesaSeleccionada(null)}>
-          ← Cambiar mesa
-        </button>
-        <h2>Menú - Mesa {mesaSeleccionada.numero}</h2>
+        <button className="btn-volver" onClick={onBack}> Volver </button>
+        <h2>Tomar Pedido</h2>
       </div>
 
       <div className="pedido-content">
-        {/* Columna de productos */}
         <div className="productos-columna">
           {loading ? (
             <p className="cargando">Cargando menú...</p>
-          ) : productosFiltrados.length > 0 ? (
+          ) : (
             <div className="productos-grid">
-              {productosFiltrados.map(producto => (
-                <div key={producto.id} className="producto-card">
-                  <div className="producto-info">
-                    <strong>{producto.nombre}</strong>
-                    <span className="producto-precio">
-                      ${producto.precio.toLocaleString()}
-                    </span>
-                  </div>
+              {productosFiltrados.length > 0 ? (
+                productosFiltrados.map(producto => (
                   <button
-                    className="btn-agregar-producto"
+                    key={producto.id}
+                    className="producto-btn"
                     onClick={() => agregarProducto(producto)}
                   >
-                    Agregar
+                    {producto.nombre}
                   </button>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p>No hay productos en esta categoría.</p>
+              )}
             </div>
-          ) : (
-            <p className="sin-productos">No hay productos en esta categoría.</p>
           )}
         </div>
 
-        {/* Columna de pedido activo */}
         <div className="orden-columna">
-          <PedidoActivo
-            mesaNumero={mesaSeleccionada.numero}
-            items={carritoLocal}
-            ivaPorcentaje={ivaPorcentaje}
-            onEliminarItem={eliminarProducto}
-          />
-          <button 
-            className="btn-ingresar"
-            onClick={handleEnviarPedido}
-            disabled={carritoLocal.length === 0}
-          >
-            🍳 Enviar a Cocina
-          </button>
+          <div className="orden-panel">
+            <h3>Orden</h3>
+            {carritoLocal.length === 0 ? (
+              <p>No hay productos en la orden.</p>
+            ) : (
+              <>
+                <div className="orden-lista">
+                  <div className="orden-header">
+                    <strong>ARTÍCULO</strong>
+                    <strong>ACCIONES</strong>
+                  </div>
+                  {carritoLocal.map(item => (
+                    <div key={item.id} className="orden-item">
+                      <span>{item.nombre} x{item.cantidad || 1}</span>
+                      <div className="acciones-item">
+                        <span className="precio-item">
+                          ${(item.precio * (item.cantidad || 1)).toLocaleString()}
+                        </span>
+                        <button
+                          className="btn-eliminar-item"
+                          onClick={() => eliminarProducto(item.id)}
+                          aria-label="Eliminar producto"
+                        >
+                          x
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="orden-totales">
+                  <div className="total-row">
+                    <span>Subtotal:</span>
+                    <span>${subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="total-row">
+                    <span>IVA ({ivaPorcentaje}%)</span>
+                    <span>${iva.toLocaleString()}</span>
+                  </div>
+                  <div className="total-row total-final">
+                    <span>Total:</span>
+                    <span>${total.toLocaleString()}</span>
+                  </div>
+                </div>
+                <button className="btn-ingresar" onClick={handleIrACaja}>
+                  Ingresar
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Barra de categorías */}
       <div className="categorias-barra">
         {categoriasDisponibles.map(categoria => (
           <button
