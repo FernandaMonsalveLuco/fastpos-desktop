@@ -12,6 +12,7 @@ import Pedidos from './renderer/components/Pedidos';
 import Configuracion from './renderer/components/Configuracion';
 import Recuperar from './renderer/components/auth/Recuperar';
 import TipoPago from './renderer/components/TipoPago';
+import MesasCRUD from './renderer/components/mesas/MesasCRUD';
 import './App.css';
 
 function App() {
@@ -130,21 +131,13 @@ function App() {
           onBack={() => setActiveSection('tomarPedido')}
         />
       );
+    case 'mesas':
+      return <MesasCRUD onBack={() => setActiveSection('home')} />;
 
     case 'tomarPedido':
-      return (
-        <TomarPedido
-          carritoActual={carrito}
-          onAgregarAlCarrito={agregarAlCarrito}
-          onEliminarDelCarrito={eliminarDelCarrito} // ✅ Pasamos la función
-          onIrACaja={() => setActiveSection('caja')}
-          onBack={() => setActiveSection('home')}
-        />
-      );
-
+      return <TomarPedido onBack={() => setActiveSection('home')} />;
     case 'pedidos':
       return <Pedidos onBack={() => setActiveSection('home')} />;
-
     case 'productos':
       return <ProductosModule onBack={() => setActiveSection('home')} />;
 

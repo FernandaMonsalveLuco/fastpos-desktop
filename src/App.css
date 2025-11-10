@@ -1769,3 +1769,234 @@ body {
 .btn-cancelar:hover {
   background-color: var(--gray-700);
 }
+
+/* === SECCIÓN TOMAR PEDIDO === */
+.tomar-pedido-container {
+  padding: 20px;
+  background-color: var(--gray-200);
+  border-radius: 10px;
+  min-height: 80vh;
+  color: var(--text-on-light);
+}
+.mesas-grid, .productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.mesa-btn, .producto-card button {
+  padding: 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.mesa-btn.ocupada {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.pedido-actual {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.btn-enviar {
+  background-color: #00769C;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* === MESAS CRUD MODULE === */
+.mesas-crud {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.crear-mesa-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.crear-mesa-form input,
+.crear-mesa-form select {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.crear-mesa-form button {
+  padding: 8px 16px;
+  background: #00769C;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.mesas-list table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.mesas-list th,
+.mesas-list td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.mesas-list th {
+  background: #f0f0f0;
+}
+
+.mesas-list button {
+  padding: 4px 8px;
+  margin: 0 2px;
+  font-size: 12px;
+}
+.estado-ocupada {
+  color: #d32f2f;
+  font-weight: bold;
+}
+
+.estado-libre {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+.btn-liberar {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  margin: 0 2px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-liberar:hover:not(:disabled) {
+  background-color: #f57c00;
+}
+
+.btn-liberar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* === PEDIDO ACTIVO PANEL === */
+.pedido-activo-panel {
+  background: var(--white);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  height: fit-content;
+}
+
+.pedido-header h3 {
+  margin-bottom: 16px;
+  color: var(--primary-dark);
+  font-size: 18px;
+}
+
+.pedido-vacio {
+  color: var(--gray-500);
+  font-style: italic;
+  text-align: center;
+  padding: 16px 0;
+}
+
+.lista-items {
+  list-style: none;
+  margin-bottom: 16px;
+}
+
+.item-pedido {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.item-nombre {
+  font-weight: 500;
+}
+
+.item-detalles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.item-precio {
+  font-weight: bold;
+}
+
+.btn-eliminar-item {
+  background: var(--danger);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.pedido-totales {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-300);
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0;
+}
+
+.total-final {
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 8px;
+}
+.item-cantidad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.btn-cantidad {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -48,6 +48,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     { id: 'tomarPedido', label: 'Tomar Pedido' },
     { id: 'caja', label: 'Caja' },
     { id: 'pedidos', label: 'Pedidos' },
+    { id: 'mesas', label: 'Mesas' }, // 🔹 Nuevo
     { id: 'productos', label: 'Productos' },
     { id: 'usuarios', label: 'Usuarios' },
     { id: 'configuracion', label: 'Configuración' },

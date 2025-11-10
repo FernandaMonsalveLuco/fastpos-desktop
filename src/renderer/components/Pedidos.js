@@ -7,9 +7,7 @@ import {
   where,
   orderBy,
   updateDoc,
-  doc,
-  getDoc,
-  writeBatch
+  doc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -27,12 +25,12 @@ const Pedidos = ({ onBack }) => {
       try {
         let q;
         if (filtroEstado === 'todos') {
-          q = query(collection(db, 'ventas'), orderBy('fecha', 'desc'));
+          q = query(collection(db, 'pedidos'), orderBy('timestamp', 'desc'));
         } else {
           q = query(
-            collection(db, 'ventas'),
+            collection(db, 'pedidos'),
             where('estado', '==', filtroEstado),
-            orderBy('fecha', 'desc')
+            orderBy('timestamp', 'desc')
           );
         }
 
@@ -42,7 +40,7 @@ const Pedidos = ({ onBack }) => {
           return {
             id: doc.id,
             ...data,
-            fecha: data.fecha?.toDate ? data.fecha.toDate() : null
+            fecha: data.timestamp?.toDate ? data.timestamp.toDate() : null
           };
         });
         setPedidos(lista);
@@ -57,58 +55,22 @@ const Pedidos = ({ onBack }) => {
     cargarPedidos();
   }, [filtroEstado]);
 
-  // ✅ Función para revertir inventario al cancelar pedido
-  const revertirInventario = async (productos) => {
-    const batch = writeBatch(db);
-
-    for (const prod of productos) {
-      if (!prod.productId || !prod.cantidad) continue;
-
-      const inventoryRef = doc(db, 'inventario', prod.productId); // ← Colección "inventario"
-      const inventorySnap = await getDoc(inventoryRef);
-
-      if (inventorySnap.exists()) {
-        const currentStock = inventorySnap.data().stock || 0; // ← Campo "stock", no "currentStock"
-        batch.update(inventoryRef, {
-          stock: currentStock + prod.cantidad, // ← Incrementa el stock
-          lastUpdated: new Date()
-        });
-      }
-    }
-
-    await batch.commit();
-  };
-
-  // ✅ Función actualizada para manejar cancelación + reversión
   const actualizarEstado = async (pedidoId, nuevoEstado) => {
     if (actualizando.has(pedidoId)) return;
     setActualizando(prev => new Set(prev).add(pedidoId));
 
     try {
-      const pedidoActual = pedidos.find(p => p.id === pedidoId);
-      if (!pedidoActual) throw new Error('Pedido no encontrado');
-
-      const estadoAnterior = pedidoActual.estado;
-
-      // Si se cancela un pedido pendiente → revertir inventario
-      if (nuevoEstado === 'cancelada' && estadoAnterior === 'pendiente') {
-        await revertirInventario(pedidoActual.productos || []);
-      }
-
-      // Actualizar estado del pedido
-      const pedidoRef = doc(db, 'ventas', pedidoId); // ← Colección "ventas"
+      const pedidoRef = doc(db, 'pedidos', pedidoId);
       await updateDoc(pedidoRef, { estado: nuevoEstado });
 
-      // Optimistic update
       setPedidos(prev =>
         prev.map(p =>
           p.id === pedidoId ? { ...p, estado: nuevoEstado } : p
         )
       );
-
     } catch (err) {
-      console.error('Error al actualizar el pedido o inventario:', err);
-      setError('No se pudo procesar la actualización. Revisa la consola.');
+      console.error('Error al actualizar el pedido:', err);
+      setError('No se pudo procesar la actualización.');
     } finally {
       setActualizando(prev => {
         const newSet = new Set(prev);
@@ -132,14 +94,14 @@ const Pedidos = ({ onBack }) => {
 
   const obtenerTextoEstado = (estado) => {
     switch (estado) {
-      case 'completada': return 'Completado';
-      case 'pendiente': return 'Pendiente';
-      case 'cancelada': return 'Cancelado';
+      case 'en_cocina': return 'En cocina';
+      case 'listo': return 'Listo';
+      case 'cancelado': return 'Cancelado';
       default: return estado || 'Desconocido';
     }
   };
 
-  const estadosPermitidos = ['pendiente', 'completada', 'cancelada'];
+  const estadosPermitidos = ['en_cocina', 'listo', 'cancelado'];
 
   return (
     <div className="pedidos-module">
@@ -153,9 +115,9 @@ const Pedidos = ({ onBack }) => {
           value={filtroEstado}
           onChange={(e) => setFiltroEstado(e.target.value)}>
           <option value="todos">Todos</option>
-          <option value="completada">Completados</option>
-          <option value="pendiente">Pendientes</option>
-          <option value="cancelada">Cancelados</option>
+          <option value="en_cocina">En cocina</option>
+          <option value="listo">Listos</option>
+          <option value="cancelado">Cancelados</option>
         </select>
       </div>
 
@@ -170,7 +132,7 @@ const Pedidos = ({ onBack }) => {
           {pedidos.map(pedido => (
             <div key={pedido.id} className="pedido-item">
               <div className="pedido-header">
-                <strong>Pedido #{pedido.id.substring(0, 6)}</strong>
+                <strong>Mesa {pedido.mesaNumero}</strong>
                 <span className={`estado-badge ${pedido.estado}`}>
                   {obtenerTextoEstado(pedido.estado)}
                 </span>
@@ -178,14 +140,13 @@ const Pedidos = ({ onBack }) => {
 
               <div className="pedido-detalles">
                 <p><strong>Fecha:</strong> {formatearFecha(pedido.fecha)}</p>
-                <p><strong>Cajero:</strong> {pedido.cajeroNombre || '—'}</p>
                 <p><strong>Total:</strong> ${pedido.total?.toLocaleString('es-ES') || '0'}</p>
                 <p><strong>Productos:</strong></p>
 
                 <ul className="productos-lista">
-                  {pedido.productos?.map((prod, i) => (
+                  {pedido.items?.map((prod, i) => (
                     <li key={`${pedido.id}-prod-${i}`}>
-                      {prod.cantidad}x {prod.nombre} — ${prod.subtotal?.toLocaleString('es-ES') || '0'}
+                      {prod.cantidad}x {prod.nombre} — ${prod.precio?.toLocaleString('es-ES') || '0'}
                     </li>
                   ))}
                 </ul>
