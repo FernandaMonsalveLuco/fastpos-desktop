@@ -257,6 +257,15 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
               {action.label}
             </button>
           ))}
+           {user?.rol === 'admin' && (
+            <button
+              className="nav-action-btn"
+              onClick={() => onSectionChange('reportes')}
+              style={{ backgroundColor: '#0077b6', color: 'white' }}
+            >
+              Reportes
+              </button>
+            )}
         </nav>
         <div className="navbar-user">
           <span>Bienvenido, <strong>{displayName}</strong></span>
