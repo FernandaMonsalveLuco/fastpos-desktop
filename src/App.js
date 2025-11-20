@@ -94,8 +94,6 @@ function App() {
   }
 
   if (showRegister) {
-    // Si usas Register, asegúrate de importarlo. Si no, elimina este bloque.
-    // return <Register onRegisterSuccess={() => setShowRegister(false)} />;
     return <Login onLogin={handleLogin} />;
   }
 
@@ -121,6 +119,11 @@ function App() {
     return null;
   }
 
+  // Función para volver al home
+  const volverHome = () => {
+    setActiveSection('home');
+  };
+
   switch (activeSection) {
     case 'caja':
       return (
@@ -128,24 +131,27 @@ function App() {
           user={user}
           carrito={carrito}
           onVaciarCarrito={vaciarCarrito}
-          onBack={() => setActiveSection('tomarPedido')}
+          onBack={volverHome}
         />
       );
-    case 'mesas':
-      return <MesasCRUD onBack={() => setActiveSection('home')} />;
 
     case 'tomarPedido':
-      return <TomarPedido onBack={() => setActiveSection('home')} />;
+      return <TomarPedido onVolverHome={volverHome} />;
+
+    case 'mesas':
+      return <MesasCRUD onVolverHome={volverHome} />;
+
     case 'pedidos':
-      return <Pedidos onBack={() => setActiveSection('home')} />;
+      return <Pedidos onBack={volverHome} />;
+
     case 'productos':
-      return <ProductosModule onBack={() => setActiveSection('home')} />;
+      return <ProductosModule onBack={volverHome} />;
 
     case 'usuarios':
-      return <UsuariosModule onBack={() => setActiveSection('home')} />;
+      return <UsuariosModule onBack={volverHome} />;
 
     case 'configuracion':
-      return <Configuracion onBack={() => setActiveSection('home')} />;
+      return <Configuracion onBack={volverHome} />;
 
     default:
       return (

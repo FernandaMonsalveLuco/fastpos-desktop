@@ -1,7 +1,34 @@
-
+// src/renderer/components/Dashboard.js
+import React, { useState, useEffect } from 'react';
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement,
+} from 'chart.js';
+
+ChartJS.register(
+  CategoryScale,  
+  LinearScale,   
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  ArcElement      
+);
 
 const Dashboard = ({ user, onLogout, onSectionChange }) => {
   const [metrics, setMetrics] = useState({
@@ -25,6 +52,7 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     { id: 'productos', label: 'Productos' },
     { id: 'usuarios', label: 'Usuarios' },
     { id: 'configuracion', label: 'Configuración' },
+    { id: 'mesas', label: 'Administrar Mesas' },
   ];
 
   useEffect(() => {

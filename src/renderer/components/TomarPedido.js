@@ -1,192 +1,104 @@
 // src/renderer/components/TomarPedido.js
-const TomarPedido = ({ 
-  carritoActual = [], 
-  onAgregarAlCarrito, 
-  onEliminarDelCarrito, // ✅ Recibimos la función del padre
-  onIrACaja, 
-  onBack 
-}) => {
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // Asegúrate de que la ruta sea correcta
+import SeleccionarMesa from './SeleccionarMesa';
+import PedidoActivo from './pedidoActivo';
+
+const TomarPedido = ({ onVolverHome }) => {
+  const [mesaSeleccionada, setMesaSeleccionada] = useState(null);
   const [productos, setProductos] = useState([]);
-  const [categoriaActiva, setCategoriaActiva] = useState(CATEGORIAS[0].value);
   const [loading, setLoading] = useState(true);
-  const [ivaPorcentaje, setIvaPorcentaje] = useState(19);
-  const [carritoLocal, setCarritoLocal] = useState([]);
+  const [mensajeToast, setMensajeToast] = useState('');
 
-  // Sincronizar carrito local con el carrito del padre
+  // Cargar productos desde Firebase
   useEffect(() => {
-    setCarritoLocal(carritoActual);
-  }, [carritoActual]);
-
-  // Cargar configuración (IVA)
-  useEffect(() => {
-    const cargarConfiguracion = async () => {
-      try {
-        const configDoc = await getDoc(doc(db, 'config', 'app'));
-        if (configDoc.exists()) {
-          const config = configDoc.data();
-          setIvaPorcentaje(config.impuesto || 19);
-        }
-      } catch (error) {
-        console.warn('No se pudo cargar la configuración. Usando IVA por defecto (19%).');
-      }
-    };
-    cargarConfiguracion();
+    cargarProductos();
   }, []);
 
-  // Cargar productos
-  useEffect(() => {
-    const fetchProductos = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'Productos'));
-        const lista = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        setProductos(lista);
-
-        const primeraValida = CATEGORIAS.find(cat => 
-          lista.some(p => p.categoria === cat.value)
-        );
-        if (primeraValida) {
-          setCategoriaActiva(primeraValida.value);
-        }
-      } catch (error) {
-        console.error('Error al cargar productos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProductos();
-  }, []);
-
-  const agregarProducto = (producto) => {
-    const nuevoItem = { ...producto, cantidad: 1 };
-    setCarritoLocal(prev => [...prev, nuevoItem]);
-    onAgregarAlCarrito([nuevoItem]);
-  };
-
-  // ✅ Corregido: ahora notifica al padre
-  const eliminarProducto = (id) => {
-    setCarritoLocal(prev => prev.filter(item => item.id !== id));
-    onEliminarDelCarrito(id); // ← Esto actualiza el carrito en App.js
-  };
-
-  // Cálculos de totales
-  const subtotal = useMemo(() =>
-    carritoLocal.reduce((sum, item) => sum + item.precio * (item.cantidad || 1), 0),
-    [carritoLocal]
-  );
-  const iva = useMemo(() => Math.round(subtotal * (ivaPorcentaje / 100)), [subtotal, ivaPorcentaje]);
-  const total = subtotal + iva;
-
-  const handleIrACaja = () => {
-    if (carritoLocal.length === 0) {
-      alert('Agrega al menos un producto al pedido.');
-      return;
+  const cargarProductos = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'Productos'));
+      const productos = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setProductos(productos);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error al cargar productos:', error);
+      setLoading(false);
     }
-    onIrACaja();
   };
 
-  const productosFiltrados = productos.filter(p => p.categoria === categoriaActiva);
-  const categoriasDisponibles = CATEGORIAS.filter(cat =>
-    productos.some(p => p.categoria === cat.value)
-  );
+  const manejarSeleccionMesa = (mesa) => {
+    setMesaSeleccionada(mesa);
+  };
 
+  const manejarVolver = () => {
+    setMesaSeleccionada(null);
+  };
+
+  // Función para enviar pedido a cocina (guardar en la colección 'pedidos')
+  const manejarEnviarPedido = async (pedidoData) => {
+    try {
+      // Guardar en la colección "pedidos" (minúscula, como en tu base de datos)
+      await addDoc(collection(db, 'pedidos'), pedidoData);
+      
+      // Mostrar mensaje de confirmación
+      setMensajeToast('Pedido enviado a cocina');
+      setTimeout(() => setMensajeToast(''), 3000);
+      
+      // No liberar la mesa aquí - eso se hace en Caja.js
+    } catch (error) {
+      console.error('Error al enviar pedido:', error);
+      setMensajeToast('Error al enviar el pedido');
+      setTimeout(() => setMensajeToast(''), 3000);
+    }
+  };
+
+  const mostrarMensaje = (mensaje) => {
+    setMensajeToast(mensaje);
+    setTimeout(() => {
+      setMensajeToast('');
+    }, 3000);
+  };
+
+  if (loading) {
+    return (
+      <div className="cargando-pedido">
+        <h2>Cargando productos...</h2>
+        <p>Por favor espere mientras se cargan los productos disponibles</p>
+      </div>
+    );
+  }
+
+  if (!mesaSeleccionada) {
+    return (
+      <SeleccionarMesa 
+        onSelectMesa={manejarSeleccionMesa}
+        onVolverHome={onVolverHome}
+      />
+    );
+  }
+
+  // Si hay mesa seleccionada, mostrar vista de pedido activo con productos
   return (
-    <div className="tomar-pedido-container">
-      <div className="pedido-header">
-        <button className="btn-volver" onClick={onBack}> Volver </button>
-        <h2>Tomar Pedido</h2>
-      </div>
-
-      <div className="pedido-content">
-        <div className="productos-columna">
-          {loading ? (
-            <p className="cargando">Cargando menú...</p>
-          ) : (
-            <div className="productos-grid">
-              {productosFiltrados.length > 0 ? (
-                productosFiltrados.map(producto => (
-                  <button
-                    key={producto.id}
-                    className="producto-btn"
-                    onClick={() => agregarProducto(producto)}
-                  >
-                    {producto.nombre}
-                  </button>
-                ))
-              ) : (
-                <p>No hay productos en esta categoría.</p>
-              )}
-            </div>
-          )}
+    <>
+      <PedidoActivo 
+        mesa={mesaSeleccionada}
+        onVolver={manejarVolver}
+        productosCatalogo={productos}
+        onEnviarPedido={manejarEnviarPedido} // Pasar función para manejar envío a cocina
+      />
+      
+      {/* Toast de notificación */}
+      {mensajeToast && (
+        <div className="toast">
+          {mensajeToast}
         </div>
-
-        <div className="orden-columna">
-          <div className="orden-panel">
-            <h3>Orden</h3>
-            {carritoLocal.length === 0 ? (
-              <p>No hay productos en la orden.</p>
-            ) : (
-              <>
-                <div className="orden-lista">
-                  <div className="orden-header">
-                    <strong>ARTÍCULO</strong>
-                    <strong>ACCIONES</strong>
-                  </div>
-                  {carritoLocal.map(item => (
-                    <div key={item.id} className="orden-item">
-                      <span>{item.nombre} x{item.cantidad || 1}</span>
-                      <div className="acciones-item">
-                        <span className="precio-item">
-                          ${(item.precio * (item.cantidad || 1)).toLocaleString()}
-                        </span>
-                        <button
-                          className="btn-eliminar-item"
-                          onClick={() => eliminarProducto(item.id)}
-                          aria-label="Eliminar producto"
-                        >
-                          x
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="orden-totales">
-                  <div className="total-row">
-                    <span>Subtotal:</span>
-                    <span>${subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="total-row">
-                    <span>IVA ({ivaPorcentaje}%)</span>
-                    <span>${iva.toLocaleString()}</span>
-                  </div>
-                  <div className="total-row total-final">
-                    <span>Total:</span>
-                    <span>${total.toLocaleString()}</span>
-                  </div>
-                </div>
-                <button className="btn-ingresar" onClick={handleIrACaja}>
-                  Ingresar
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <div className="categorias-barra">
-        {categoriasDisponibles.map(categoria => (
-          <button
-            key={categoria.value}
-            className={`categoria-btn ${categoriaActiva === categoria.value ? 'active' : ''}`}
-            onClick={() => setCategoriaActiva(categoria.value)}
-          >
-            {categoria.label}
-          </button>
-        ))}
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
