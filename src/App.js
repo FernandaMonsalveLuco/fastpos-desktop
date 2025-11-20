@@ -14,6 +14,7 @@ import Recuperar from './renderer/components/auth/Recuperar';
 import TipoPago from './renderer/components/TipoPago';
 import MesasCRUD from './renderer/components/mesas/MesasCRUD';
 import './App.css';
+import ReportesAdmin from './renderer/components/ReportesAdmin';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -152,6 +153,14 @@ function App() {
 
     case 'configuracion':
       return <Configuracion onBack={volverHome} />;
+      
+    case 'reportes':
+        if (!isAdmin) {
+          alert('Acceso denegado. Solo admin.');
+          setActiveSection('home');
+          return null;
+        }
+        return <ReportesAdmin onBack={() => setActiveSection('home')} />;
 
     default:
       return (
