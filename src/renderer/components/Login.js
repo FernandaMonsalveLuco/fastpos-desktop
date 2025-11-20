@@ -2,15 +2,24 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 const Login = ({ onLogin, onShowRegister, onShowForgotPassword }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Verificar captcha primero
+    if (!captchaToken) {
+      setError('Por favor completa el captcha.');
+      return;
+    }
+    
     if (!email || !password) {
       setError('Por favor ingresa correo y contraseña.');
       return;
@@ -70,6 +79,14 @@ const Login = ({ onLogin, onShowRegister, onShowForgotPassword }) => {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             disabled={loading}
+          />
+        </div>
+
+          {/*hCaptcha añadido*/}
+        <div style={{ margin: '16px 0' }}>
+          <HCaptcha
+            sitekey={process.env.REACT_APP_HCAPTCHA_SITEKEY}
+            onVerify={setCaptchaToken}
           />
         </div>
 
