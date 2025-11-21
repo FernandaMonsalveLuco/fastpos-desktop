@@ -102,8 +102,6 @@ const ReportesAdmin = ({ onBack }) => {
       >
         Volver
       </button>
-
-      /* Botone exportar
       <div style={{ display: 'flex', gap: 10, marginBottom: 30 }}>
         <button className="btn-editar" onClick={exportarPDF}>
           Exportar PDF

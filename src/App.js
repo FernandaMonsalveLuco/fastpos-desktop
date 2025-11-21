@@ -132,7 +132,7 @@ function App() {
           user={user}
           carrito={carrito}
           onVaciarCarrito={vaciarCarrito}
-          onBack={volverHome}
+          onVolverHome={volverHome} // <- Cambiado a 'onVolverHome'
         />
       );
 

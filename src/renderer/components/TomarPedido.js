@@ -1,7 +1,7 @@
 // src/renderer/components/TomarPedido.js
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Asegúrate de que la ruta sea correcta
+import { db } from '../firebase'; 
 import SeleccionarMesa from './SeleccionarMesa';
 import PedidoActivo from './pedidoActivo';
 
@@ -28,6 +28,9 @@ const TomarPedido = ({ onVolverHome }) => {
     } catch (error) {
       console.error('Error al cargar productos:', error);
       setLoading(false);
+      // Mostrar mensaje de error al usuario
+      setMensajeToast('Error al cargar productos');
+      setTimeout(() => setMensajeToast(''), 3000);
     }
   };
 
@@ -57,18 +60,17 @@ const TomarPedido = ({ onVolverHome }) => {
     }
   };
 
-  const mostrarMensaje = (mensaje) => {
-    setMensajeToast(mensaje);
-    setTimeout(() => {
-      setMensajeToast('');
-    }, 3000);
-  };
-
   if (loading) {
     return (
-      <div className="cargando-pedido">
-        <h2>Cargando productos...</h2>
-        <p>Por favor espere mientras se cargan los productos disponibles</p>
+      <div className="dashboard-container">
+        <div className="caja-header">
+          <button onClick={onVolverHome} className="btn-volver">← Volver al Home</button>
+          <h2>Tomar Pedido</h2>
+        </div>
+        <div className="cargando-pedido">
+          <h2>Cargando productos...</h2>
+          <p>Por favor espere mientras se cargan los productos disponibles</p>
+        </div>
       </div>
     );
   }
@@ -84,21 +86,14 @@ const TomarPedido = ({ onVolverHome }) => {
 
   // Si hay mesa seleccionada, mostrar vista de pedido activo con productos
   return (
-    <>
+    <div className="dashboard-container">
       <PedidoActivo 
         mesa={mesaSeleccionada}
         onVolver={manejarVolver}
         productosCatalogo={productos}
         onEnviarPedido={manejarEnviarPedido} // Pasar función para manejar envío a cocina
       />
-      
-      {/* Toast de notificación */}
-      {mensajeToast && (
-        <div className="toast">
-          {mensajeToast}
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 

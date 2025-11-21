@@ -1004,6 +1004,7 @@ body {
 
 .btn-guardar {
   background: var(--primary-medium);
+  margin-bottom: 16px;
   color: var(--white);
   border: none;
   padding: 12px 24px;
@@ -1112,8 +1113,8 @@ body {
 .pedido-item {
   background: var(--white);
   border-radius: 10px;
-  padding: 16px;
-  margin: 4px;
+  padding: 20px;
+  margin: 20px;
   box-shadow: var(--shadow);
   transition: background 0.3s ease, box-shadow 0.3s ease;
   color: var(--text-on-light);
@@ -1181,7 +1182,7 @@ body {
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
-  color: white;
+  color: var(--primary-dark);
 }
 
 .estado-badge.completada {
@@ -1837,7 +1838,6 @@ body {
 }
 
 .pedido-actual {
-  margin-top: 20px;
   padding: 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -1944,26 +1944,151 @@ body {
   cursor: not-allowed;
 }
 
-/* === PEDIDO ACTIVO PANEL === */
-.pedido-activo-panel {
-  background: var(--white);
+/* === ESTILOS PARA PEDIDO ACTIVO === */
+.pedido-activo {
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  height: fit-content;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.pedido-header h3 {
-  margin-bottom: 16px;
-  color: var(--primary-dark);
+.pedido-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.pedido-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.pedido-contenido {
+  display: flex;
+  gap: 20px;
+}
+
+/* Estilos para la sección de productos disponibles (izquierda) */
+.productos-disponibles {
+  flex: 1; /* Ocupa 1 parte del espacio disponible */
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 100%; /* Ocupa el 50% del ancho en desktop */
+}
+
+.productos-disponibles h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.filtro-categoria {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.filtro-categoria label {
+  margin-right: 10px;
+  font-weight: 500;
+  color: #333;
+}
+
+.select-categoria {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.producto-item {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 15px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.producto-item:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  background: #f8f9ff;
+}
+
+.producto-info h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.producto-precio {
+  margin: 0 0 8px 0;
+  font-weight: bold;
+  color: #28a745;
   font-size: 18px;
 }
 
-.pedido-vacio {
-  color: var(--gray-500);
+.producto-descripcion {
+  margin: 0 0 10px 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
   font-style: italic;
+}
+
+.btn-agregar-producto {
+  width: 100%;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.btn-agregar-producto:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+/* Estilos para la sección de pedido actual (derecha) */
+.pedido-actual {
+  flex: 1; /* Ocupa 1 parte del espacio disponible */
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 100%; /* Ocupa el 50% del ancho en desktop */
+}
+
+.pedido-actual h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.pedido-vacio {
   text-align: center;
-  padding: 16px 0;
+  padding: 40px 20px;
+  color: #666;
+  font-style: italic;
 }
 
 .lista-items {
@@ -1976,7 +2101,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid var(--gray-100);
+  border-bottom: 1px solid #eee;
 }
 
 .item-nombre {
@@ -1994,7 +2119,7 @@ body {
 }
 
 .btn-eliminar-item {
-  background: var(--danger);
+  background: #dc3545;
   color: white;
   width: 24px;
   height: 24px;
@@ -2010,7 +2135,7 @@ body {
 .pedido-totales {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid var(--gray-300);
+  border-top: 1px solid #eee;
 }
 
 .total-row {
@@ -2019,13 +2144,13 @@ body {
   margin: 6px 0;
 }
 
-.total-final {
+.total-row.total-final {
   font-weight: bold;
   font-size: 18px;
   margin-top: 8px;
 }
 
-.item-cantidad {
+.item-controles {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -2042,6 +2167,54 @@ body {
   align-items: center;
   justify-content: center;
 }
+
+/* Botón para enviar pedido */
+.btn-enviar-pedido{
+  width: 100%;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+  margin-top: 10px;
+}
+
+.btn-enviar-pedido:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.btn-enviar-pedido:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Estilos para dispositivos móviles */
+@media (max-width: 768px) {
+  .pedido-contenido {
+    flex-direction: column; /* Cambia a columna en móviles */
+    gap: 15px;
+  }
+
+  .productos-disponibles,
+  .pedido-actual {
+    max-width: 100%; 
+  }
+
+  .productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Ajusta el tamaño de las cajas */
+    gap: 10px;
+  }
+
+  .producto-item {
+    padding: 12px; /* Ajusta el padding */
+  }
+}
+
+
 
 /* Estilos para la vista de selección de mesas */
 .seleccionar-mesa {
@@ -2307,7 +2480,8 @@ body {
   font-weight: bold;
 }
 
-.btn-pagar {
+
+.btn-pagar  {
   background-color: #28a745;
   color: white;
 }
@@ -2953,3 +3127,96 @@ body {
   flex: 1;
   max-width: 250px;
 }
+/* ... (otros estilos del App.css) ... */
+
+/* === ESTILOS PARA PEDIDO ACTIVO === */
+/* Botón para agregar producto en PedidoActivo */
+.btn-agregar-producto {
+  width: 100%;
+  background-color: var(--primary-medium);
+  color: var(--white);
+  border: none;
+  padding: 10px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.btn-agregar-producto:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+/* Botones de cantidad en PedidoActivo */
+.btn-cantidad {
+  width: 35px;
+  height: 35px;
+  border: 2px solid var(--border-color);
+  background: var(--white);
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.btn-cantidad:hover {
+  background-color: var(--gray-100);
+  border-color: var(--primary-medium);
+}
+
+/* Botón para eliminar item en PedidoActivo */
+.btn-eliminar-item {
+  background: var(--danger);
+  color: var(--white);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 14px;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-eliminar-item:hover {
+  background: #c82333;
+}
+
+/* Botón para enviar pedido en PedidoActivo */
+.btn-enviar-pedido {
+  width: 100%;
+  background-color: var(--success);
+  color: var(--white);
+  border: none;
+  padding: 14px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 15px;
+}
+
+.btn-enviar-pedido:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-enviar-pedido:disabled {
+  background-color: var(--gray-400);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ... (otros estilos del App.css) ... */

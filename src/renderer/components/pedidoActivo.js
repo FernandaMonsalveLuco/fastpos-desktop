@@ -1,26 +1,47 @@
-// src/renderer/components/PedidoActivo.js
-import React, { useState, useEffect } from 'react';
-import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Asegúrate de que la ruta sea correcta
+// src/renderer/components/PedidoActivo.js (con diseño responsivo: productos a la izquierda, pedido a la derecha)
 
-const PedidoActivo = ({ mesa, onVolver, productosCatalogo = [], onEnviarPedido }) => {
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'; // ✅ Importado getDocs
+import { db } from '../firebase';
+
+const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
   const [productosPedido, setProductosPedido] = useState([]);
-  const [productosLocales, setProductosLocales] = useState(productosCatalogo);
+  const [productosCatalogo, setProductosCatalogo] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('todos');
+  const [loading, setLoading] = useState(true);
   const [mensajeToast, setMensajeToast] = useState('');
+  const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
 
-  // Inicializar categorías cuando se cargan los productos
+  // Cargar productos desde Firebase
   useEffect(() => {
-    // Obtener categorías únicas
-    const categoriasUnicas = [...new Set(productosLocales.map(p => p.categoria))];
-    setCategorias(['todos', ...categoriasUnicas]);
-  }, [productosLocales]);
+    const cargarProductos = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'Productos')); // ✅ Funciona ahora
+        const productosList = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          insumos: doc.data().insumos || [],
+        }));
+        setProductosCatalogo(productosList);
+        
+        // Obtener categorías únicas
+        const categoriasUnicas = [...new Set(productosList.map(p => p.categoria))];
+        setCategorias(['todos', ...categoriasUnicas]);
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarProductos();
+  }, []);
 
   // Filtrar productos por categoría
   const productosFiltrados = categoriaSeleccionada === 'todos' 
-    ? productosLocales 
-    : productosLocales.filter(p => p.categoria === categoriaSeleccionada);
+    ? productosCatalogo 
+    : productosCatalogo.filter(p => p.categoria === categoriaSeleccionada);
 
   // Función para manejar la adición de productos
   const agregarProducto = (producto) => {
@@ -81,7 +102,12 @@ const PedidoActivo = ({ mesa, onVolver, productosCatalogo = [], onEnviarPedido }
     }, 3000);
   };
 
-  // Función para enviar pedido a cocina (usando la función del padre)
+  // Función para eliminar un producto del pedido
+  const eliminarProducto = (id) => {
+    setProductosPedido(prev => prev.filter(p => p.id !== id));
+  };
+
+  // Función para enviar pedido a cocina/caja
   const enviarPedido = async () => {
     // Validaciones
     if (!mesa) {
@@ -95,7 +121,7 @@ const PedidoActivo = ({ mesa, onVolver, productosCatalogo = [], onEnviarPedido }
     }
 
     try {
-      // Crear el pedido en Firebase con la estructura correcta
+      // Crear el pedido en Firebase
       const pedidoData = {
         mesaId: mesa.id,
         mesaNumero: mesa.numero,
@@ -111,192 +137,183 @@ const PedidoActivo = ({ mesa, onVolver, productosCatalogo = [], onEnviarPedido }
         })),
         total: totalAcumulado,
         estado: 'en_cocina', // Estado inicial
-        timestamp: new Date(),
-        createdAt: new Date(), // Para coincidir con tu estructura de datos
+        timestamp: serverTimestamp(),
+        createdAt: serverTimestamp(),
         activo: true
       };
 
+      // Guardar en Firebase
+      const docRef = await addDoc(collection(db, 'Pedidos'), pedidoData);
+
       // Llamar a la función del padre para manejar el envío
-      if (onEnviarPedido) {
-        await onEnviarPedido(pedidoData);
-      } else {
-        // Fallback si no se proporciona la función del padre
-        await addDoc(collection(db, 'pedidos'), pedidoData);
-        mostrarMensaje('Pedido enviado a cocina');
-      }
+      await onEnviarPedido({ ...pedidoData, id: docRef.id });
 
-      // Opcional: Limpiar el pedido local después de enviarlo
-      // setProductosPedido([]); // Descomenta si quieres limpiar el pedido después de enviarlo
+      // Limpiar productos del pedido actual después de enviar
+      setProductosPedido([]);
 
+      // Mostrar mensaje de confirmación
+      mostrarMensaje('Pedido enviado a cocina');
     } catch (error) {
       console.error('Error al enviar pedido:', error);
       mostrarMensaje('Error al enviar el pedido');
     }
   };
 
-  // Función para liberar la mesa (opcional - para cuando el mesero termina el servicio)
-  const liberarMesa = async () => {
-    if (productosPedido.length > 0) {
-      if (!window.confirm('La mesa tiene productos en el pedido. ¿Estás seguro de liberarla?')) {
-        return;
-      }
+  // Función para manejar confirmación de envío
+  const manejarEnviarPedido = () => {
+    if (productosPedido.length === 0) {
+      mostrarMensaje('No hay productos en el pedido');
+      return;
     }
-
-    try {
-      // Actualizar estado de la mesa en Firebase
-      const mesaRef = doc(db, 'mesas', mesa.id);
-      await updateDoc(mesaRef, { estado: 'libre' });
-
-      // Limpiar el pedido local
-      setProductosPedido([]);
-
-      // Volver a la selección de mesas
-      onVolver();
-    } catch (error) {
-      console.error('Error al liberar mesa:', error);
-      mostrarMensaje('Error al liberar la mesa');
-    }
+    setMostrarConfirmacion(true);
   };
+
+  // Confirmar envío
+  const confirmarEnvio = () => {
+    enviarPedido();
+    setMostrarConfirmacion(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="pedido-activo">
+        <div className="pedido-header">
+          <button onClick={onVolver} className="btn-volver">← Volver a mesas</button>
+          <h2>Pedido - Mesa {mesa?.numero}</h2>
+        </div>
+        <p>Cargando productos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="pedido-activo">
       <div className="pedido-header">
-        <button onClick={onVolver} className="volver-btn">← Volver</button>
+        <button onClick={onVolver} className="btn-volver">← Volver a mesas</button>
         <h2>Pedido - Mesa {mesa.numero}</h2>
-        <div className="mesa-info">
-          <span className="estado-mesa">Estado: {mesa.estado}</span>
-        </div>
       </div>
 
       <div className="pedido-contenido">
-        {/* Catálogo de productos */}
-        <div className="catalogo-productos">
-          <div className="catalogo-header">
-            <h3>Catálogo de Productos</h3>
-            <div className="filtro-categorias">
-              <label htmlFor="categoria">Categoría:</label>
-              <select
-                id="categoria"
-                value={categoriaSeleccionada}
-                onChange={(e) => setCategoriaSeleccionada(e.target.value)}
-                className="select-categoria"
-              >
-                {categorias.map(categoria => (
-                  <option key={categoria} value={categoria}>
-                    {categoria.charAt(0).toUpperCase() + categoria.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Productos disponibles (izquierda) */}
+        <div className="productos-disponibles">
+          {/* Selector de categoría */}
+          <div className="filtro-categoria">
+            <label htmlFor="categoria">Categoría:</label>
+            <select
+              id="categoria"
+              value={categoriaSeleccionada}
+              onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+              className="select-categoria"
+            >
+              {categorias.map(categoria => (
+                <option key={categoria} value={categoria}>
+                  {categoria.charAt(0).toUpperCase() + categoria.slice(1)}
+                </option>
+              ))}
+            </select>
           </div>
 
+          <h3>Productos</h3>
           <div className="productos-grid">
-            {productosFiltrados.length === 0 ? (
-              <div className="no-productos">
-                <p>No hay productos en esta categoría</p>
-              </div>
-            ) : (
-              productosFiltrados.map(producto => (
-                <div key={producto.id} className="producto-card">
-                  <div className="producto-info">
-                    <h4>{producto.nombre}</h4>
-                    <p className="producto-precio">${producto.precio?.toLocaleString()}</p>
-                    <p className="producto-categoria">
-                      <span className="categoria-tag">{producto.categoria}</span>
-                    </p>
-                    {producto.descripcion && (
-                      <p className="producto-descripcion">{producto.descripcion}</p>
-                    )}
-                  </div>
+            {productosFiltrados.map(producto => (
+              <div key={producto.id} className="producto-item">
+                <div className="producto-info">
+                  <h4>{producto.nombre}</h4>
+                  <p className="producto-precio">${producto.precio?.toLocaleString('es-ES')}</p>
+                  <p className="producto-descripcion">{producto.descripcion}</p>
                   <button
                     onClick={() => agregarProducto(producto)}
-                    className="btn-agregar"
+                    className="btn-agregar-producto"
                   >
-                    Agregar +
+                    Agregar
                   </button>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Lista de productos del pedido */}
-        <div className="productos-lista">
-          <h3>Productos del Pedido</h3>
-          
+        {/* Pedido actual (derecha) */}
+        <div className="pedido-actual">
+          <h3>Pedido Actual</h3>
           {productosPedido.length === 0 ? (
-            <div className="lista-vacia">
-              <p>No hay productos agregados aún</p>
-              <p className="mensaje-informativo">Selecciona productos del catálogo para comenzar el pedido</p>
-            </div>
+            <p className="pedido-vacio">No hay productos en el pedido</p>
           ) : (
-            <div className="productos-pedido">
-              {productosPedido.map((producto) => (
-                <div key={producto.id} className="producto-pedido-item">
-                  <div className="producto-detalle">
-                    <span className="producto-nombre">{producto.nombre}</span>
-                    <span className="producto-precio">${producto.precio?.toLocaleString()}</span>
-                  </div>
-                  
-                  <div className="cantidad-control">
-                    <button 
-                      onClick={() => disminuirCantidad(producto.id)}
-                      className="btn-cantidad"
-                    >
-                      -
-                    </button>
-                    <span className="cantidad">{producto.cantidad}</span>
-                    <button 
-                      onClick={() => aumentarCantidad(producto.id)}
-                      className="btn-cantidad"
-                    >
-                      +
-                    </button>
-                  </div>
-                  
-                  <div className="producto-subtotal">
-                    <span>${producto.subtotal?.toLocaleString()}</span>
-                  </div>
-                  
-                  <button 
-                    onClick={() => disminuirCantidad(producto.id)}
-                    className="btn-eliminar"
-                  >
-                    ×
-                  </button>
+            <div className="pedido-items">
+              <ul className="lista-items">
+                {productosPedido.map((producto) => (
+                  <li key={producto.id} className="item-pedido">
+                    <div className="item-info">
+                      <span className="item-nombre">{producto.nombre}</span>
+                      <div className="item-controles">
+                        <button 
+                          onClick={() => disminuirCantidad(producto.id)}
+                          className="btn-cantidad"
+                        >
+                          -
+                        </button>
+                        <span className="item-cantidad">{producto.cantidad}</span>
+                        <button 
+                          onClick={() => aumentarCantidad(producto.id)}
+                          className="btn-cantidad"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <div className="item-detalles">
+                      <span className="item-precio">${producto.subtotal?.toLocaleString('es-ES')}</span>
+                      <button
+                        onClick={() => eliminarProducto(producto.id)}
+                        className="btn-eliminar-item"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              
+              {/* Total acumulado */}
+              <div className="pedido-totales">
+                <div className="total-row total-final">
+                  <span>Total:</span>
+                  <span>${totalAcumulado?.toLocaleString('es-ES')}</span>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* Total acumulado */}
-          <div className="total-acumulado">
-            <div className="total-info">
-              <h3>Total Acumulado</h3>
-              <div className="total-valor">
-                <span className="total-numero">${totalAcumulado.toLocaleString()}</span>
               </div>
-            </div>
-            
-            {/* Botones de acción */}
-            <div className="acciones-pedido">
+
+              {/* Botón para enviar a cocina */}
               <button 
-                onClick={enviarPedido}
-                className="btn-enviar"
-                disabled={productosPedido.length === 0}
+                onClick={manejarEnviarPedido}
+                className="btn-enviar-pedido"
               >
                 Enviar a Cocina
               </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Modal de confirmación */}
+      {mostrarConfirmacion && (
+        <div className="modal-confirmacion">
+          <div className="modal-content">
+            <h3>Confirmar envío</h3>
+            <p>¿Estás seguro que deseas enviar este pedido a cocina?</p>
+            <div className="modal-buttons">
+              <button onClick={confirmarEnvio} className="btn-confirmar">
+                Sí, enviar
+              </button>
               <button 
-                onClick={liberarMesa}
-                className="btn-liberar"
+                onClick={() => setMostrarConfirmacion(false)} 
+                className="btn-cancelar"
               >
-                Liberar Mesa
+                Cancelar
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Toast de notificación */}
       {mensajeToast && (

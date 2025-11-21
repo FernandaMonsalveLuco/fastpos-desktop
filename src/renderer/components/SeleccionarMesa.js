@@ -1,3 +1,4 @@
+// src/renderer/components/SeleccionarMesa.js
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase'; // Asegúrate de que la ruta sea correcta
