@@ -45,7 +45,7 @@ const Caja = ({ user, onBack }) => {
   // Cargar pedidos de una mesa específica
   const cargarPedidosMesa = async (mesaId) => {
     try {
-      const pedidosSnapshot = await getDocs(collection(db, 'pedidos'));
+      const pedidosSnapshot = await getDocs(collection(db, 'Pedidos'));
       const pedidos = pedidosSnapshot.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
         .filter(pedido => 
@@ -141,7 +141,7 @@ const Caja = ({ user, onBack }) => {
       const docRef = await addDoc(collection(db, 'ventas'), venta);
 
       // Actualizar estado del pedido
-      await updateDoc(doc(db, 'pedidos', pedidoSeleccionado.id), {
+      await updateDoc(doc(db, 'Pedidos', pedidoSeleccionado.id), {
         estado: 'Pagado',
         fechaPago: serverTimestamp()
       });
