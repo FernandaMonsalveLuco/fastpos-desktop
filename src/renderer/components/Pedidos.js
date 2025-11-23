@@ -25,10 +25,11 @@ const Pedidos = ({ onBack }) => {
       try {
         let q;
         if (filtroEstado === 'todos') {
-          q = query(collection(db, 'pedidos'), orderBy('timestamp', 'desc'));
+          // ✅ Usar 'Pedidos' (con P mayúscula)
+          q = query(collection(db, 'Pedidos'), orderBy('timestamp', 'desc'));
         } else {
           q = query(
-            collection(db, 'pedidos'),
+            collection(db, 'Pedidos'), // ✅ Aquí también
             where('estado', '==', filtroEstado),
             orderBy('timestamp', 'desc')
           );
@@ -60,7 +61,8 @@ const Pedidos = ({ onBack }) => {
     setActualizando(prev => new Set(prev).add(pedidoId));
 
     try {
-      const pedidoRef = doc(db, 'pedidos', pedidoId);
+      // ✅ Actualizar en 'Pedidos' (con P mayúscula)
+      const pedidoRef = doc(db, 'Pedidos', pedidoId);
       await updateDoc(pedidoRef, { estado: nuevoEstado });
 
       setPedidos(prev =>
