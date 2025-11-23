@@ -1,14 +1,16 @@
 // src/renderer/components/mesas/MesasCRUD.js
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../../firebase'; // Asegúrate de que la ruta sea correcta
+import { db } from '../../firebase';
 
-const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al home
+const MesasCRUD = ({ onVolverHome }) => {
   const [mesas, setMesas] = useState([]);
   const [numero, setNumero] = useState('');
+  const [estado, setEstado] = useState('libre'); // Nuevo estado editable
   const [activo, setActivo] = useState(true);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     cargarMesas();
@@ -29,38 +31,65 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
     }
   };
 
+  // Función para verificar si el número de mesa ya existe (excluyendo la mesa que se está editando)
+  const numeroMesaExiste = (numero, mesaId = null) => {
+    return mesas.some(mesa => 
+      mesa.numero === parseInt(numero) && mesa.id !== mesaId
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    const numeroInt = parseInt(numero);
     
+    // Validación: número es requerido y positivo
+    if (!numero || numeroInt <= 0) {
+      setError('El número de mesa debe ser un valor positivo.');
+      return;
+    }
+
+    // Validación: número de mesa ya existe
+    if (numeroMesaExiste(numeroInt, editingId)) {
+      setError('Ya existe una mesa con ese número.');
+      return;
+    }
+
     if (editingId) {
       // Actualizar mesa existente
       try {
         const mesaRef = doc(db, 'mesas', editingId);
         await updateDoc(mesaRef, {
-          numero: parseInt(numero),
-          activo
+          numero: numeroInt,
+          estado: estado,
+          activo: activo
         });
         setEditingId(null);
         setNumero('');
+        setEstado('libre');
         setActivo(true);
         cargarMesas();
       } catch (error) {
         console.error('Error al actualizar mesa:', error);
+        setError('Error al actualizar la mesa. Intente nuevamente.');
       }
     } else {
       // Crear nueva mesa
       try {
         await addDoc(collection(db, 'mesas'), {
-          numero: parseInt(numero),
-          activo,
-          estado: 'libre',
+          numero: numeroInt,
+          estado: estado,
+          activo: activo,
           timestamp: new Date()
         });
         setNumero('');
+        setEstado('libre');
         setActivo(true);
         cargarMesas();
       } catch (error) {
         console.error('Error al crear mesa:', error);
+        setError('Error al crear la mesa. Intente nuevamente.');
       }
     }
   };
@@ -68,7 +97,8 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
   const handleEditar = (mesa) => {
     setEditingId(mesa.id);
     setNumero(mesa.numero);
-    setActivo(mesa.activo);
+    setEstado(mesa.estado || 'libre');
+    setActivo(mesa.activo !== false); // Por defecto true si no existe
   };
 
   const handleEliminar = async (mesaId) => {
@@ -78,6 +108,7 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
         cargarMesas();
       } catch (error) {
         console.error('Error al eliminar mesa:', error);
+        setError('Error al eliminar la mesa.');
       }
     }
   };
@@ -95,6 +126,8 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
       
       {/* Formulario para crear/editar */}
       <form onSubmit={handleSubmit} className="formulario-mesa">
+        {error && <div className="error-form">{error}</div>}
+        
         <div className="campo-form">
           <label htmlFor="numero">Número de Mesa:</label>
           <input
@@ -105,6 +138,18 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
             required
             min="1"
           />
+        </div>
+        
+        <div className="campo-form">
+          <label htmlFor="estado">Estado:</label>
+          <select
+            id="estado"
+            value={estado}
+            onChange={(e) => setEstado(e.target.value)}
+          >
+            <option value="libre">Libre</option>
+            <option value="ocupada">Ocupada</option>
+          </select>
         </div>
         
         <div className="campo-form">
@@ -128,7 +173,9 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
             onClick={() => {
               setEditingId(null);
               setNumero('');
+              setEstado('libre');
               setActivo(true);
+              setError('');
             }}
             className="btn-cancelar"
           >
@@ -143,7 +190,6 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Número</th>
               <th>Estado</th>
               <th>Activo</th>
@@ -153,7 +199,6 @@ const MesasCRUD = ({ onVolverHome }) => { // Recibe la función para volver al h
           <tbody>
             {mesas.map((mesa) => (
               <tr key={mesa.id}>
-                <td>{mesa.id}</td>
                 <td>{mesa.numero}</td>
                 <td>
                   {mesa.estado === 'ocupada' ? (

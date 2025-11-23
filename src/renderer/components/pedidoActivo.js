@@ -1,7 +1,7 @@
-// src/renderer/components/PedidoActivo.js (con diseño responsivo: productos a la izquierda, pedido a la derecha)
+// src/renderer/components/PedidoActivo.js (con botón Liberar Mesa y diseño responsivo)
 
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore'; // ✅ Importado getDocs
+import { collection, getDocs, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
@@ -17,7 +17,7 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
   useEffect(() => {
     const cargarProductos = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'Productos')); // ✅ Funciona ahora
+        const querySnapshot = await getDocs(collection(db, 'Productos'));
         const productosList = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -38,6 +38,24 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
     cargarProductos();
   }, []);
 
+  // Función para liberar la mesa
+  const liberarMesa = async () => {
+    if (!mesa || !mesa.id) {
+      mostrarMensaje('Mesa no válida');
+      return;
+    }
+
+    try {
+      const mesaRef = doc(db, 'mesas', mesa.id);
+      await updateDoc(mesaRef, { estado: 'libre' });
+      mostrarMensaje('Mesa liberada correctamente');
+      onVolver(); // Regresa a la selección de mesas
+    } catch (error) {
+      console.error('Error al liberar la mesa:', error);
+      mostrarMensaje('Error al liberar la mesa');
+    }
+  };
+
   // Filtrar productos por categoría
   const productosFiltrados = categoriaSeleccionada === 'todos' 
     ? productosCatalogo 
@@ -48,7 +66,6 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
     const productoExistente = productosPedido.find(p => p.id === producto.id);
     
     if (productoExistente) {
-      // Si el producto ya existe, aumentar la cantidad
       setProductosPedido(prev =>
         prev.map(p =>
           p.id === producto.id
@@ -57,7 +74,6 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
         )
       );
     } else {
-      // Si es nuevo, agregarlo
       const productoConCantidad = {
         ...producto,
         cantidad: 1,
@@ -87,7 +103,7 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
             ? { ...p, cantidad: p.cantidad - 1, subtotal: (p.cantidad - 1) * p.precio }
             : p
         )
-        .filter(p => p.cantidad > 0) // Eliminar productos con cantidad 0
+        .filter(p => p.cantidad > 0)
     );
   };
 
@@ -109,7 +125,6 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
 
   // Función para enviar pedido a cocina/caja
   const enviarPedido = async () => {
-    // Validaciones
     if (!mesa) {
       mostrarMensaje('No hay mesa seleccionada');
       return;
@@ -121,7 +136,6 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
     }
 
     try {
-      // Crear el pedido en Firebase
       const pedidoData = {
         mesaId: mesa.id,
         mesaNumero: mesa.numero,
@@ -136,22 +150,15 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
           insumos: producto.insumos || []
         })),
         total: totalAcumulado,
-        estado: 'en_cocina', // Estado inicial
+        estado: 'en_cocina',
         timestamp: serverTimestamp(),
         createdAt: serverTimestamp(),
         activo: true
       };
 
-      // Guardar en Firebase
       const docRef = await addDoc(collection(db, 'Pedidos'), pedidoData);
-
-      // Llamar a la función del padre para manejar el envío
       await onEnviarPedido({ ...pedidoData, id: docRef.id });
-
-      // Limpiar productos del pedido actual después de enviar
       setProductosPedido([]);
-
-      // Mostrar mensaje de confirmación
       mostrarMensaje('Pedido enviado a cocina');
     } catch (error) {
       console.error('Error al enviar pedido:', error);
@@ -191,12 +198,18 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
       <div className="pedido-header">
         <button onClick={onVolver} className="btn-volver">← Volver a mesas</button>
         <h2>Pedido - Mesa {mesa.numero}</h2>
+        
+        {/* Botón Liberar Mesa (solo si está ocupada) */}
+        {mesa?.estado === 'ocupada' && (
+          <button onClick={liberarMesa} className="btn-liberar-mesa">
+            Liberar Mesa
+          </button>
+        )}
       </div>
 
       <div className="pedido-contenido">
         {/* Productos disponibles (izquierda) */}
         <div className="productos-disponibles">
-          {/* Selector de categoría */}
           <div className="filtro-categoria">
             <label htmlFor="categoria">Categoría:</label>
             <select
@@ -274,7 +287,6 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
                 ))}
               </ul>
               
-              {/* Total acumulado */}
               <div className="pedido-totales">
                 <div className="total-row total-final">
                   <span>Total:</span>
@@ -282,7 +294,6 @@ const PedidoActivo = ({ mesa, onVolver, onEnviarPedido }) => {
                 </div>
               </div>
 
-              {/* Botón para enviar a cocina */}
               <button 
                 onClick={manejarEnviarPedido}
                 className="btn-enviar-pedido"

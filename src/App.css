@@ -117,14 +117,16 @@
   background: var(--primary-medium);
 }
 
-.tabla-reportes {
+.tabla-reportes, .tabla-mesas {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
 }
 
 .tabla-reportes th,
-.tabla-reportes td {
+.tabla-reportes td,
+.tabla-mesas th,
+.tabla-mesas td {
   padding: 12px;
   border-bottom: 1px solid var(--border-color);
   text-align: left;
@@ -2214,33 +2216,16 @@ body {
   }
 }
 
+/* === SELECCIÓN DE MESAS CON BOTÓN LIBERAR === */
 
-
-/* Estilos para la vista de selección de mesas */
-.seleccionar-mesa {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.seleccionar-mesa-header {
+.mesa-contenedor {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 20px;
+  gap: 8px;
 }
 
-.seleccionar-mesa-header h2 {
-  margin: 0 0 0 10px;
-  flex-grow: 1;
-}
-
-.mesas-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
+/* Tus estilos originales de .mesa-btn (sin cambios) */
 .mesa-btn {
   height: 120px;
   border: 2px solid #ddd;
@@ -2254,6 +2239,7 @@ body {
   transition: all 0.3s ease;
   font-size: 16px;
   font-weight: bold;
+  width: 100%; /* Asegura que ocupe todo el ancho del grid */
 }
 
 .mesa-btn:hover:not(:disabled) {
@@ -2306,6 +2292,27 @@ body {
   color: white;
 }
 
+/* Botón "Liberar" solo para mesas ocupadas */
+.btn-liberar-mesa {
+  background-color: #ff9800; /* Amarillo/orange - mismo que --warning */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  max-width: 150px; /* Ajusta al ancho de la mesa */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn-liberar-mesa:hover {
+  background-color: #f57c00;
+  transform: translateY(-1px);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .mesas-grid {
@@ -2318,6 +2325,11 @@ body {
   }
   .mesa-numero {
     font-size: 16px;
+  }
+  .btn-liberar-mesa {
+    max-width: 120px;
+    padding: 5px 10px;
+    font-size: 11px;
   }
 }
 
@@ -3259,3 +3271,4 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
 }
+

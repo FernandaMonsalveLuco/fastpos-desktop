@@ -1,7 +1,7 @@
 // src/renderer/components/SeleccionarMesa.js
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase'; // Asegúrate de que la ruta sea correcta
+import { db } from '../firebase';
 
 const SeleccionarMesa = ({ onSelectMesa, onVolverHome }) => {
   const [mesas, setMesas] = useState([]);
@@ -34,18 +34,15 @@ const SeleccionarMesa = ({ onSelectMesa, onVolverHome }) => {
     }
 
     try {
-      // Actualizar en Firestore: marcar como ocupada
       const mesaRef = doc(db, 'mesas', mesa.id);
       await updateDoc(mesaRef, { estado: 'ocupada' });
 
-      // Actualizar estado local para reflejar el cambio en la UI
       setMesas(prev => 
         prev.map(m => 
           m.id === mesa.id ? { ...m, estado: 'ocupada' } : m
         )
       );
 
-      // Notificar al componente padre que se seleccionó una mesa
       onSelectMesa(mesa);
     } catch (error) {
       console.error('Error al marcar mesa como ocupada:', error);
@@ -53,7 +50,23 @@ const SeleccionarMesa = ({ onSelectMesa, onVolverHome }) => {
     }
   };
 
-  // Filtrar mesas por estado
+  // Nueva función para liberar mesa
+  const liberarMesa = async (mesaId) => {
+    try {
+      const mesaRef = doc(db, 'mesas', mesaId);
+      await updateDoc(mesaRef, { estado: 'libre' });
+
+      setMesas(prev => 
+        prev.map(m => 
+          m.id === mesaId ? { ...m, estado: 'libre' } : m
+        )
+      );
+    } catch (error) {
+      console.error('Error al liberar la mesa:', error);
+      alert('No se pudo liberar la mesa. Inténtalo de nuevo.');
+    }
+  };
+
   const mesasFiltradas = filtroEstado === 'todos' 
     ? mesas 
     : mesas.filter(mesa => mesa.estado === filtroEstado);
@@ -91,20 +104,31 @@ const SeleccionarMesa = ({ onSelectMesa, onVolverHome }) => {
       
       <div className="mesas-grid">
         {mesasFiltradas.map(mesa => (
-          <button
-            key={mesa.id}
-            className={`mesa-btn ${mesa.estado === 'ocupada' ? 'ocupada' : 'libre'}`}
-            onClick={() => manejarSeleccionMesa(mesa)}
-            disabled={mesa.estado === 'ocupada' || !mesa.activo}
-          >
-            <div className="mesa-info">
-              <span className="mesa-numero">Mesa {mesa.numero}</span>
-              <span className={`mesa-estado ${mesa.estado}`}>
-                {mesa.estado === 'ocupada' ? 'Ocupada' : 'Libre'}
-              </span>
-              {!mesa.activo && <span className="mesa-inactiva">Inactiva</span>}
-            </div>
-          </button>
+          <div key={mesa.id} className="mesa-contenedor">
+            <button
+              className={`mesa-btn ${mesa.estado === 'ocupada' ? 'ocupada' : 'libre'}`}
+              onClick={() => manejarSeleccionMesa(mesa)}
+              disabled={mesa.estado === 'ocupada' || !mesa.activo}
+            >
+              <div className="mesa-info">
+                <span className="mesa-numero">Mesa {mesa.numero}</span>
+                <span className={`mesa-estado ${mesa.estado}`}>
+                  {mesa.estado === 'ocupada' ? 'Ocupada' : 'Libre'}
+                </span>
+                {!mesa.activo && <span className="mesa-inactiva">Inactiva</span>}
+              </div>
+            </button>
+
+            {/* Botón Liberar solo si la mesa está ocupada */}
+            {mesa.estado === 'ocupada' && (
+              <button 
+                onClick={() => liberarMesa(mesa.id)} 
+                className="btn-liberar-mesa"
+              >
+                Liberar
+              </button>
+            )}
+          </div>
         ))}
       </div>
     </div>
