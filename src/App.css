@@ -3219,4 +3219,43 @@ body {
   opacity: 0.6;
 }
 
-/* ... (otros estilos del App.css) ... */
+/* === BOTONES EN CAJA === */
+.btn-enviar-caja {
+  background-color: var(--primary-medium);
+  color: var(--white);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 12px;
+}
+
+.btn-enviar-caja:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-marcar-pagado {
+  background-color: var(--success);
+  color: var(--white);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 12px;
+}
+
+.btn-marcar-pagado:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(40, 167, 69, 0.2);
+}

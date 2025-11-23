@@ -1,8 +1,8 @@
 // src/renderer/components/Caja.js
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
-import TipoPago from './TipoPago'; // Asegúrate de la ruta correcta
+import TipoPago from './TipoPago';
 
 const Caja = ({ onVolverHome }) => {
   const [pedidos, setPedidos] = useState([]);
@@ -10,7 +10,7 @@ const Caja = ({ onVolverHome }) => {
   const [pedidosCaja, setPedidosCaja] = useState([]);
   const [loading, setLoading] = useState(true);
   const [mensajeToast, setMensajeToast] = useState('');
-  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null); // Nuevo estado para el pedido seleccionado
+  const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null);
 
   useEffect(() => {
     cargarPedidos();
@@ -18,7 +18,6 @@ const Caja = ({ onVolverHome }) => {
 
   const cargarPedidos = async () => {
     try {
-      // Obtener todos los pedidos ordenados por timestamp
       const q = query(
         collection(db, 'Pedidos'),
         orderBy('timestamp', 'desc')
@@ -30,7 +29,6 @@ const Caja = ({ onVolverHome }) => {
         ...doc.data()
       }));
 
-      // Separar pedidos por estado
       const cocina = listaPedidos.filter(p => p.estado === 'en_cocina');
       const caja = listaPedidos.filter(p => p.estado === 'en_caja');
 
@@ -44,7 +42,6 @@ const Caja = ({ onVolverHome }) => {
     }
   };
 
-  // Función para mostrar mensajes temporales
   const mostrarMensaje = (mensaje) => {
     setMensajeToast(mensaje);
     setTimeout(() => {
@@ -52,13 +49,10 @@ const Caja = ({ onVolverHome }) => {
     }, 3000);
   };
 
-  // Función para pasar pedido de cocina a caja
   const enviarACaja = async (pedidoId) => {
     try {
       const pedidoRef = doc(db, 'Pedidos', pedidoId);
       await updateDoc(pedidoRef, { estado: 'en_caja' });
-      
-      // Actualizar estado local
       cargarPedidos();
       mostrarMensaje('Pedido enviado a caja');
     } catch (error) {
@@ -67,37 +61,33 @@ const Caja = ({ onVolverHome }) => {
     }
   };
 
-  // Función para marcar pedido como pagado (ahora abre el modal de TipoPago)
   const marcarComoPagado = (pedidoId) => {
     const pedido = pedidosCaja.find(p => p.id === pedidoId);
     if (pedido) {
-      setPedidoSeleccionado(pedido); // Establece el pedido seleccionado
+      setPedidoSeleccionado({ ...pedido, mesaId: pedido.mesaId });
     } else {
       mostrarMensaje('Pedido no encontrado en la lista de caja.');
     }
   };
 
-  // Función para manejar el pago (después de que se cierra el modal TipoPago)
-  const manejarPago = async (pedidoId, metodoPago, montoRecibido) => {
+  const manejarPago = async (pedidoId, pagoData) => {
     try {
       const pedidoRef = doc(db, 'Pedidos', pedidoId);
       await updateDoc(pedidoRef, { 
         estado: 'pagado',
-        metodoPago, // Opcional: guardar el método de pago
+        metodoPago: pagoData.metodo,
         timestamp: new Date()
       });
       
-      // Actualizar estado local
       cargarPedidos();
       mostrarMensaje('Pedido marcado como pagado');
-      setPedidoSeleccionado(null); // Cierra el modal de TipoPago
+      setPedidoSeleccionado(null);
     } catch (error) {
       console.error('Error al marcar pedido como pagado:', error);
       mostrarMensaje('Error al marcar pedido como pagado');
     }
   };
 
-  // Función para cerrar el modal de TipoPago sin pagar
   const cerrarTipoPago = () => {
     setPedidoSeleccionado(null);
   };
@@ -118,9 +108,10 @@ const Caja = ({ onVolverHome }) => {
     <div className="caja">
       <div className="dashboard-container">
         <div className="caja-header">
-            <button onClick={onVolverHome} className="btn-volver">← Volver al Home</button>
-            <h2>Caja</h2>
+          <button onClick={onVolverHome} className="btn-volver">← Volver al Home</button>
+          <h2>Caja</h2>
         </div>
+
         <div className="caja-contenido">
           {/* Pedidos en Cocina */}
           <div className="seccion-pedidos">
@@ -194,8 +185,9 @@ const Caja = ({ onVolverHome }) => {
       {pedidoSeleccionado && (
         <TipoPago
           total={pedidoSeleccionado.total}
-          onPagar={(metodo, monto) => manejarPago(pedidoSeleccionado.id, metodo, monto)}
-          onCancelar={cerrarTipoPago}
+          mesaId={pedidoSeleccionado.mesaId}
+          onPagar={(pagoData) => manejarPago(pedidoSeleccionado.id, pagoData)}
+          onCancel={cerrarTipoPago}
         />
       )}
 
