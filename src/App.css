@@ -1840,7 +1840,7 @@ body {
 .pedido-actual {
   padding: 16px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .btn-enviar {

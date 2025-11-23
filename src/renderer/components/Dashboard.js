@@ -45,24 +45,54 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
   });
   const [loading, setLoading] = useState(true);
 
-  const quickActions = [
-    { id: 'tomarPedido', label: 'Tomar Pedido' },
-    { id: 'caja', label: 'Caja' },
-    { id: 'pedidos', label: 'Pedidos' },
-    { id: 'productos', label: 'Productos' },
-    { id: 'usuarios', label: 'Usuarios' },
-    { id: 'configuracion', label: 'Configuración' },
-    { id: 'mesas', label: 'Administrar Mesas' },
-  ];
+  // Filtrar acciones según el rol del usuario
+  const getQuickActions = () => {
+    const baseActions = [
+      { id: 'tomarPedido', label: 'Tomar Pedido' },
+      { id: 'caja', label: 'Caja' },
+      { id: 'pedidos', label: 'Pedidos' },
+    ];
+
+    // Meseros solo pueden tomar pedidos
+    if (user?.rol === 'mesero') {
+      return [
+        { id: 'tomarPedido', label: 'Tomar Pedido' }
+      ];
+    }
+
+    // Cajeros pueden tomar pedidos y acceder a caja
+    if (user?.rol === 'cajero') {
+      return [
+        { id: 'tomarPedido', label: 'Tomar Pedido' },
+        { id: 'caja', label: 'Caja' }
+      ];
+    }
+
+    // Admin tiene acceso a todo
+    if (user?.rol === 'admin') {
+      return [
+        { id: 'tomarPedido', label: 'Tomar Pedido' },
+        { id: 'caja', label: 'Caja' },
+        { id: 'pedidos', label: 'Pedidos' },
+        { id: 'productos', label: 'Productos' },
+        { id: 'usuarios', label: 'Usuarios' },
+        { id: 'configuracion', label: 'Configuración' },
+        { id: 'mesas', label: 'Administrar Mesas' },
+      ];
+    }
+
+    return baseActions;
+  };
 
   useEffect(() => {
     const fetchMetricsFromData = async () => {
       try {
-        const ventasSnapshot = await getDocs(collection(db, 'ventas'));
-        const ventas = ventasSnapshot.docs.map(doc => ({
+        // Obtener pedidos (no ventas) para métricas más precisas
+        const pedidosSnapshot = await getDocs(collection(db, 'Pedidos'));
+        const pedidos = pedidosSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
-          fecha: doc.data().fecha?.toDate ? doc.data().fecha.toDate() : new Date()
+          timestamp: doc.data().timestamp?.toDate ? doc.data().timestamp.toDate() : new Date()
         }));
 
         const usuariosSnapshot = await getDocs(collection(db, 'Usuarios'));
@@ -84,57 +114,59 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
         const cajerosVentas = {};
         const ventasPorDia = Array(7).fill(0);
 
-        ventas.forEach(venta => {
-          const cajeroId = venta.cajeroId;
-          const cajeroNombre = usuariosMap[cajeroId] || 'Desconocido';
-          const totalVenta = venta.total || 0;
+        pedidos.forEach(pedido => {
+          const totalPedido = pedido.total || 0;
+          const estadoPedido = pedido.estado?.trim().toLowerCase() || '';
 
-          if (!cajerosVentas[cajeroId]) {
-            cajerosVentas[cajeroId] = {
-              nombre: cajeroNombre,
-              total: 0,
-              pedidos: 0
-            };
+          // Contar pedidos pendientes (en_cocina o en_caja)
+          if (estadoPedido === 'en_cocina' || estadoPedido === 'en_caja') {
+            pedidosPendientes++;
           }
 
-          const estadoVenta = venta.estado;
-          if (typeof estadoVenta === 'string') {
-            const estadoNormalizado = estadoVenta.trim().toLowerCase();
-            if (estadoNormalizado === 'pendiente') {
-              pedidosPendientes++;
+          // Solo contar pedidos pagados para métricas de ventas
+          if (estadoPedido === 'pagado') {
+            const cajeroId = pedido.cajeroId || 'desconocido';
+            const cajeroNombre = usuariosMap[cajeroId] || 'Desconocido';
+
+            if (!cajerosVentas[cajeroId]) {
+              cajerosVentas[cajeroId] = {
+                nombre: cajeroNombre,
+                total: 0,
+                pedidos: 0
+              };
             }
-          }
 
-          cajerosVentas[cajeroId].total += totalVenta;
-          cajerosVentas[cajeroId].pedidos += 1;
+            cajerosVentas[cajeroId].total += totalPedido;
+            cajerosVentas[cajeroId].pedidos += 1;
 
-          totalVentas += totalVenta;
-          totalPedidos++;
+            totalVentas += totalPedido;
+            totalPedidos++;
 
-          const fechaVenta = venta.fecha;
-          const fechaSinHora = new Date(fechaVenta);
-          fechaSinHora.setHours(0, 0, 0, 0);
+            const fechaPedido = pedido.timestamp;
+            const fechaSinHora = new Date(fechaPedido);
+            fechaSinHora.setHours(0, 0, 0, 0);
 
-          if (fechaSinHora.getTime() === hoy.getTime()) {
-            ventasHoy += totalVenta;
-            pedidosHoy++;
-          }
+            if (fechaSinHora.getTime() === hoy.getTime()) {
+              ventasHoy += totalPedido;
+              pedidosHoy++;
+            }
 
-          if (Array.isArray(venta.productos)) {
-            venta.productos.forEach(p => {
-              const nombre = p.nombre || 'Producto';
-              if (!productosVendidos[nombre]) {
-                productosVendidos[nombre] = 0;
-              }
-              productosVendidos[nombre] += p.cantidad || 1;
-            });
-          }
+            if (Array.isArray(pedido.items)) {
+              pedido.items.forEach(item => {
+                const nombre = item.nombre || 'Producto';
+                if (!productosVendidos[nombre]) {
+                  productosVendidos[nombre] = 0;
+                }
+                productosVendidos[nombre] += item.cantidad || 1;
+              });
+            }
 
-          const diffTime = hoy - fechaSinHora;
-          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-          if (diffDays >= 0 && diffDays < 7) {
-            const diaIndex = fechaSinHora.getDay() === 0 ? 6 : fechaSinHora.getDay() - 1;
-            ventasPorDia[diaIndex] += totalVenta;
+            const diffTime = hoy - fechaSinHora;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays >= 0 && diffDays < 7) {
+              const diaIndex = fechaSinHora.getDay() === 0 ? 6 : fechaSinHora.getDay() - 1;
+              ventasPorDia[diaIndex] += totalPedido;
+            }
           }
         });
 
@@ -173,9 +205,10 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
     fetchMetricsFromData();
     const interval = setInterval(fetchMetricsFromData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user?.rol]);
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'Usuario';
+  const quickActions = getQuickActions();
 
   // === COLORES ADAPTADOS A OCEAN BREEZE ===
   const primaryDark = '#03045e';
@@ -257,15 +290,15 @@ const Dashboard = ({ user, onLogout, onSectionChange }) => {
               {action.label}
             </button>
           ))}
-           {user?.rol === 'admin' && (
+          {user?.rol === 'admin' && (
             <button
               className="nav-action-btn"
               onClick={() => onSectionChange('reportes')}
               style={{ backgroundColor: '#0077b6', color: 'white' }}
             >
               Reportes
-              </button>
-            )}
+            </button>
+          )}
         </nav>
         <div className="navbar-user">
           <span>Bienvenido, <strong>{displayName}</strong></span>
