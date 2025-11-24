@@ -6,7 +6,7 @@
   /* Primarios */
   --primary-dark: #023047;    /* Texto / fondo oscuro */
   --primary-medium: #0288d1;  /* Turquesa más saturado y oscuro → mejor contraste */
-  --primary-light: #b3e5fc;   /* Azul claro más brillante → mejor contraste sobre blanco */
+  --primary-light: #55c9ff;   /* Azul claro más brillante → mejor contraste sobre blanco */
   /* Secundarios y estados */
   --secondary: #ff9800;       /* Naranja más saturado → destaca mejor */
   --danger: #d32f2f;          /* Rojo accesible (no naranja) → alto contraste */

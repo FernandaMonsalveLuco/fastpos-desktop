@@ -73,7 +73,7 @@ const SeleccionarMesa = ({ onSelectMesa, onVolverHome }) => {
 
   if (loading) {
     return (
-      <div className="seleccionar-mesa">
+      <div className="dashboard-container">
         <div className="seleccionar-mesa-header">
           <button onClick={onVolverHome} className="btn-volver">← Volver al Home</button>
           <h2>Cargando mesas...</h2>
@@ -83,7 +83,7 @@ const SeleccionarMesa = ({ onSelectMesa, onVolverHome }) => {
   }
 
   return (
-    <div className="seleccionar-mesa">
+    <div className="dashboard-container">
       <div className="seleccionar-mesa-header">
         <button onClick={onVolverHome} className="btn-volver">← Volver al Home</button>
         <h2>Selecciona una mesa</h2>
